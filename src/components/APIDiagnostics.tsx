@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { 
   ComputerDesktopIcon,
-  GlobeAltIcon,
   ShieldCheckIcon,
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline'

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { ConfigSelector } from './components/ModelSelector'
-import TranslationPanel from './components/TranslationPanel'
+import UnifiedTranslationPanel from './components/UnifiedTranslationPanel'
 import HistoryPanel from './components/HistoryPanel'
 import ErrorBoundary from './components/ErrorBoundary'
 import APIKeySettings from './components/APIKeySettings'
@@ -113,11 +112,8 @@ const TranslationContainer: React.FC<TranslationContainerProps> = ({ onShowSetti
           {/* 欢迎信息和设置 */}
           <div className="text-center relative">
             <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
-              Qwen-MT 智能翻译
+              Qwen-MT 翻译
             </h1>
-            <p className="mt-2 max-w-md mx-auto text-base text-gray-500 sm:text-lg sm:max-w-2xl">
-              基于通义千问模型的多语言翻译服务，支持92种语言互译
-            </p>
             
             {/* 设置按钮 */}
             <button
@@ -129,49 +125,25 @@ const TranslationContainer: React.FC<TranslationContainerProps> = ({ onShowSetti
             </button>
           </div>
           
-          {/* 配置区域 */}
-          <div className="max-w-3xl mx-auto space-y-3">
-            {/* API Key 状态提示 */}
-            {(!apiKey || !isAPIKeyValid) && (
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-                <div className="flex items-center space-x-2">
-                  <ExclamationTriangleIcon className="w-5 h-5 text-amber-500" />
-                  <div className="flex-1">
-                    <p className="text-sm text-amber-800">
-                      {!apiKey 
-                        ? '请在设置中配置API Key以使用翻译服务'
-                        : 'API Key无效，请检查配置'
-                      }
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-            
-            <ConfigSelector
-              // Language props
-              sourceLanguage={sourceLanguage}
-              targetLanguage={targetLanguage}
-              availableLanguages={supportedLanguages}
-              onSourceLanguageChange={setSourceLanguage}
-              onTargetLanguageChange={setTargetLanguage}
-              onSwapLanguages={swapLanguages}
-              // Model props
-              selectedModel={selectedModel}
-              availableModels={availableModels}
-              onModelChange={setSelectedModel}
-              disabled={isTranslating}
-            />
-          </div>
-          
-          {/* 翻译面板 */}
-          <TranslationPanel
+          {/* 统一翻译面板 */}
+          <UnifiedTranslationPanel
             sourceText={sourceText}
             translatedText={translatedText}
             isTranslating={isTranslating}
             onSourceTextChange={setSourceText}
             onTranslate={translate}
             onClear={clearTranslation}
+            sourceLanguage={sourceLanguage}
+            targetLanguage={targetLanguage}
+            availableLanguages={supportedLanguages}
+            onSourceLanguageChange={setSourceLanguage}
+            onTargetLanguageChange={setTargetLanguage}
+            onSwapLanguages={swapLanguages}
+            selectedModel={selectedModel}
+            availableModels={availableModels}
+            onModelChange={setSelectedModel}
+            apiKey={apiKey}
+            isAPIKeyValid={isAPIKeyValid}
             disabled={!apiKey || !isAPIKeyValid}
           />
           

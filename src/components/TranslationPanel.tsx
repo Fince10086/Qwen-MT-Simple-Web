@@ -4,7 +4,6 @@ import {
   ClipboardDocumentIcon,
   TrashIcon,
   BookmarkIcon,
-  SpeakerWaveIcon
 } from '@heroicons/react/24/outline'
 import { TranslationPanelProps } from '../types'
 import { DEFAULT_CONFIG } from '../utils/constants'
