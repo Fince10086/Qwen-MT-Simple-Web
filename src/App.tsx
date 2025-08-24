@@ -99,7 +99,7 @@ const TranslationContainer: React.FC<TranslationContainerProps> = ({ onShowSetti
   
   return (
     <div className="min-h-screen bg-gray-50">
-      <main className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-4">
+      <main className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-10 py-4">
         {/* 错误提示 */}
         {error && (
           <ErrorAlert
