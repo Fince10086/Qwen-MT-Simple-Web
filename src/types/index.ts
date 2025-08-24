@@ -162,6 +162,7 @@ export interface TranslationState {
   // 配置状态
   availableModels: ModelInfo[]
   supportedLanguages: Language[]
+  enabledLanguages: string[] // 用户自选的语言列表
   apiRegion: 'beijing' | 'singapore'
   apiKey: string
   isAPIKeyValid: boolean
@@ -184,6 +185,7 @@ export interface TranslationState {
   setAPIKey: (apiKey: string) => Promise<void>
   validateAPIKey: () => Promise<boolean>
   initializeAPI: () => void
+  setEnabledLanguages: (languages: string[]) => void // 设置启用的语言
 }
 
 // API配置类型

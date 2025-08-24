@@ -4,12 +4,13 @@
 
 @layer base {
   html {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     scroll-behavior: smooth;
   }
   
   body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+    @apply bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 text-gray-900 antialiased;
+    min-height: 100vh;
   }
   
   /* 确保在移动设备上的可读性 */
@@ -21,12 +22,14 @@
 }
 
 @layer components {
+  /* 通义风格主按钮 */
   .btn-primary {
-    @apply bg-primary-600 hover:bg-primary-700 disabled:bg-primary-300 text-white font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:cursor-not-allowed;
+    @apply bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-gray-300 disabled:to-gray-400 text-white font-medium py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed transform hover:scale-105 disabled:hover:scale-100;
   }
   
+  /* 通义风格次要按钮 */
   .btn-secondary {
-    @apply bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 text-gray-900 font-medium py-2 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:cursor-not-allowed;
+    @apply bg-white hover:bg-gray-50 disabled:bg-gray-100 text-gray-700 font-medium py-3 px-6 rounded-xl border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:cursor-not-allowed transform hover:scale-105 disabled:hover:scale-100;
   }
   
   .input-field {
@@ -41,13 +44,13 @@
     @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white cursor-pointer transition-colors duration-200 disabled:bg-gray-100 disabled:cursor-not-allowed;
   }
   
-  /* ChatGLM风格的对话框样式 */
+  /* 简化的对话框样式 */
   .chat-container {
-    @apply bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden;
+    @apply bg-white rounded-2xl border border-gray-200 overflow-hidden;
   }
   
   .chat-header {
-    @apply bg-gradient-to-r from-blue-50 to-indigo-50 px-6 py-4 border-b border-gray-100;
+    @apply bg-gray-50 px-8 py-6 border-b border-gray-200;
   }
   
   .language-indicator {
@@ -59,11 +62,11 @@
   }
   
   .input-box {
-    @apply w-full px-4 py-3 border-2 rounded-xl resize-none transition-all duration-200 focus:outline-none focus:ring-0 placeholder:text-gray-400;
+    @apply w-full px-6 py-4 border rounded-2xl resize-none transition-all duration-300 focus:outline-none focus:ring-0 placeholder:text-gray-400 bg-white;
   }
   
   .input-box-normal {
-    @apply border-gray-200 focus:border-blue-500 bg-white hover:border-gray-300;
+    @apply border-gray-200 focus:border-blue-400 hover:border-gray-300;
   }
   
   .input-box-error {
@@ -71,7 +74,7 @@
   }
   
   .result-box {
-    @apply w-full px-4 py-3 border-2 rounded-xl transition-all duration-200;
+    @apply w-full px-6 py-4 border rounded-2xl transition-all duration-300 bg-white;
   }
   
   .result-box-empty {
@@ -79,20 +82,7 @@
   }
   
   .result-box-filled {
-    @apply border-green-200 bg-green-50;
-  }
-  
-  /* 现代按钮样式 */
-  .modern-btn {
-    @apply inline-flex items-center justify-center rounded-xl font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md;
-  }
-  
-  .modern-btn-primary {
-    @apply bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white focus:ring-blue-500 border border-blue-600;
-  }
-  
-  .modern-btn-secondary {
-    @apply bg-white hover:bg-gray-50 text-gray-700 focus:ring-gray-500 border border-gray-300 hover:border-gray-400;
+    @apply border-emerald-200 bg-emerald-50;
   }
   
   /* 响应式网格布局 */
@@ -112,22 +102,49 @@
     }
   }
   
-  /* 卡片样式 */
-  .card {
-    @apply bg-white rounded-lg border border-gray-200 shadow-sm;
+  /* 通义风格页面容器 */
+  .tongyi-page {
+    @apply min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50;
   }
   
-  .card-header {
-    @apply px-6 py-4 border-b border-gray-200;
+  /* 通义风格标题 */
+  .tongyi-title {
+    @apply text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent;
   }
   
-  .card-body {
-    @apply p-6;
+  /* 通义风格副标题 */
+  .tongyi-subtitle {
+    @apply text-lg text-gray-600 font-medium;
   }
   
   /* 加载动画 */
   .spinner {
     @apply w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin;
+  }
+  
+  /* 美观的自定义滚动条 */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 3px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, rgba(59, 130, 246, 0.3), rgba(99, 102, 241, 0.3));
+    border-radius: 3px;
+    transition: background 0.2s ease;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, rgba(59, 130, 246, 0.6), rgba(99, 102, 241, 0.6));
   }
   
   /* 滚动条样式 */
@@ -165,6 +182,23 @@
 }
 
 @layer utilities {
+  /* 移动端安全区域支持 */
+  .safe-area-pb {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .safe-area-pt {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-area-pl {
+    padding-left: env(safe-area-inset-left);
+  }
+  
+  .safe-area-pr {
+    padding-right: env(safe-area-inset-right);
+  }
+  
   /* 隐藏滚动条但保持滚动功能 */
   .scrollbar-hide {
     -ms-overflow-style: none;

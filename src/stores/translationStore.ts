@@ -11,7 +11,8 @@ import { createQwenAPI } from '../services/qwenTranslationAPI'
 import { 
   DEFAULT_CONFIG, 
   AVAILABLE_MODELS, 
-  SUPPORTED_LANGUAGES 
+  SUPPORTED_LANGUAGES,
+  DEFAULT_ENABLED_LANGUAGES
 } from '../utils/constants'
 
 interface TranslationStore extends TranslationState {}
@@ -32,6 +33,7 @@ export const useTranslationStore = create<TranslationStore>()(
       // 配置状态
       availableModels: AVAILABLE_MODELS,
       supportedLanguages: SUPPORTED_LANGUAGES,
+      enabledLanguages: DEFAULT_ENABLED_LANGUAGES,
       apiRegion: DEFAULT_CONFIG.API_REGION,
       apiKey: '',
       isAPIKeyValid: false,
@@ -87,7 +89,7 @@ export const useTranslationStore = create<TranslationStore>()(
       
       translate: async () => {
         const state = get()
-        const { sourceText, sourceLanguage, targetLanguage, selectedModel, apiRegion } = state
+        const { sourceText, sourceLanguage, targetLanguage, selectedModel } = state
         
         // 验证输入
         if (!sourceText.trim()) {
@@ -333,6 +335,21 @@ export const useTranslationStore = create<TranslationStore>()(
           console.error('API初始化过程出错:', error)
           // 不设置错误状态，避免影响应用正常启动
         }
+      },
+
+      setEnabledLanguages: (languages: string[]) => {
+        // 确保自动检测在列表中
+        const enabledLanguages = languages.includes('auto') ? languages : ['auto', ...languages]
+        set({ enabledLanguages, error: null })
+        
+        // 如果当前选中的源语言或目标语言不在新的列表中，重置为默认值
+        const { sourceLanguage, targetLanguage } = get()
+        if (!enabledLanguages.includes(sourceLanguage)) {
+          set({ sourceLanguage: DEFAULT_CONFIG.SOURCE_LANGUAGE })
+        }
+        if (!enabledLanguages.includes(targetLanguage)) {
+          set({ targetLanguage: DEFAULT_CONFIG.TARGET_LANGUAGE })
+        }
       }
     }),
     {
@@ -345,7 +362,8 @@ export const useTranslationStore = create<TranslationStore>()(
         targetLanguage: state.targetLanguage,
         apiRegion: state.apiRegion,
         apiKey: state.apiKey, // 持久化API Key
-        isAPIKeyValid: state.isAPIKeyValid
+        isAPIKeyValid: state.isAPIKeyValid,
+        enabledLanguages: state.enabledLanguages // 持久化用户选择的语言
       }),
       version: 2, // 增加版本号
       migrate: (persistedState: any, version: number) => {
@@ -425,6 +443,11 @@ export const useTranslationStore = create<TranslationStore>()(
             
             if (!state.apiRegion || !['beijing', 'singapore'].includes(state.apiRegion)) {
               state.apiRegion = DEFAULT_CONFIG.API_REGION
+            }
+            
+            // 验证启用的语言列表
+            if (!state.enabledLanguages || !Array.isArray(state.enabledLanguages)) {
+              state.enabledLanguages = DEFAULT_ENABLED_LANGUAGES
             }
             
             console.log('数据恢复成功，历史记录数量:', state.history?.length || 0)

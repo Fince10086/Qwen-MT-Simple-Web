@@ -130,3 +130,18 @@ export const DEFAULT_CONFIG = {
   MAX_TEXT_LENGTH: 2000,
   HISTORY_LIMIT: 100
 }
+
+// 默认启用的语言列表（中英日韩法西德俄意阿）
+export const DEFAULT_ENABLED_LANGUAGES = [
+  'auto', // 自动检测
+  'zh',   // 中文
+  'en',   // 英语
+  'ja',   // 日语
+  'ko',   // 韩语
+  'fr',   // 法语
+  'es',   // 西班牙语
+  'de',   // 德语
+  'ru',   // 俄语
+  'it',   // 意大利语
+  'ar'    // 阿拉伯语
+]
