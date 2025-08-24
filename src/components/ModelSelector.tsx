@@ -1,72 +1,213 @@
-import React from 'react'
-import { RadioGroup } from '@headlessui/react'
-import { CheckCircleIcon, InformationCircleIcon } from '@heroicons/react/24/solid'
-import { ModelSelectorProps, ModelInfo } from '../types'
+import React, { Fragment } from 'react'
+import { RadioGroup, Listbox, Transition } from '@headlessui/react'
+import { CheckCircleIcon, ChevronUpDownIcon, ArrowsRightLeftIcon, CheckIcon } from '@heroicons/react/24/outline'
+import { ModelSelectorProps, LanguageSelectorProps, Language } from '../types'
 
-interface ModelCardProps {
-  model: ModelInfo
-  selected: boolean
+// 语言下拉选择器组件
+interface LanguageDropdownProps {
+  value: string
+  options: Language[]
+  onChange: (value: string) => void
   disabled?: boolean
+  label: string
+  placeholder?: string
 }
 
-const ModelCard: React.FC<ModelCardProps> = ({ model, selected, disabled = false }) => {
+const LanguageDropdown: React.FC<LanguageDropdownProps> = ({
+  value,
+  options,
+  onChange,
+  disabled = false,
+  label,
+  placeholder = '选择语言'
+}) => {
+  const selectedLanguage = options.find(lang => lang.code === value)
+
   return (
-    <div className={`
-      relative rounded-lg border p-4 cursor-pointer transition-all duration-200
-      ${selected 
-        ? 'border-primary-500 ring-2 ring-primary-500 bg-primary-50' 
-        : 'border-gray-300 hover:border-gray-400 bg-white'
-      }
-      ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
-    `}>
-      <div className="flex items-start justify-between">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center space-x-2">
-            <h4 className={`text-sm font-medium ${selected ? 'text-primary-900' : 'text-gray-900'}`}>
-              {model.name}
-            </h4>
-            {model.id === 'qwen-mt-plus' && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
-                推荐
-              </span>
-            )}
-          </div>
-          <p className={`mt-1 text-sm ${selected ? 'text-primary-700' : 'text-gray-500'}`}>
-            {model.description}
-          </p>
+    <div className="w-full">
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        {label}
+      </label>
+      <Listbox value={value} onChange={onChange} disabled={disabled}>
+        <div className="relative">
+          <Listbox.Button className="relative w-full cursor-pointer rounded-md bg-white py-2 pl-3 pr-8 text-left shadow-sm border border-gray-300 focus:outline-none focus:ring-1 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors text-sm">
+            <span className="flex items-center">
+              {selectedLanguage ? (
+                <>
+                  <span className="block truncate font-medium text-gray-900">
+                    {selectedLanguage.name}
+                  </span>
+                </>
+              ) : (
+                <span className="block truncate text-gray-400">
+                  {placeholder}
+                </span>
+              )}
+            </span>
+            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+              <ChevronUpDownIcon
+                className="h-4 w-4 text-gray-400"
+                aria-hidden="true"
+              />
+            </span>
+          </Listbox.Button>
           
-          {/* Model Specs */}
-          <div className="mt-3 grid grid-cols-2 gap-4 text-xs">
-            <div>
-              <span className="text-gray-500">上下文长度:</span>
-              <span className="ml-1 font-medium">{model.contextLength.toLocaleString()}</span>
-            </div>
-            <div>
-              <span className="text-gray-500">最大输入:</span>
-              <span className="ml-1 font-medium">{model.maxInput.toLocaleString()}</span>
-            </div>
-            <div>
-              <span className="text-gray-500">输入成本:</span>
-              <span className="ml-1 font-medium">¥{model.inputCostPer1k}/1K tokens</span>
-            </div>
-            <div>
-              <span className="text-gray-500">输出成本:</span>
-              <span className="ml-1 font-medium">¥{model.outputCostPer1k}/1K tokens</span>
-            </div>
-          </div>
+          <Transition
+            as={Fragment}
+            leave="transition ease-in duration-100"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <Listbox.Options className="absolute z-10 mt-1 max-h-48 w-full overflow-auto rounded-md bg-white py-1 text-sm shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+              {options.map((language) => (
+                <Listbox.Option
+                  key={language.code}
+                  className={({ active }) =>
+                    `relative cursor-pointer select-none py-2 pl-8 pr-4 ${
+                      active ? 'bg-primary-100 text-primary-900' : 'text-gray-900'
+                    }`
+                  }
+                  value={language.code}
+                >
+                  {({ selected }) => (
+                    <>
+                      <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>
+                        {language.name}
+                      </span>
+                      {selected ? (
+                        <span className="absolute inset-y-0 left-0 flex items-center pl-2 text-primary-600">
+                          <CheckIcon className="h-4 w-4" aria-hidden="true" />
+                        </span>
+                      ) : null}
+                    </>
+                  )}
+                </Listbox.Option>
+              ))}
+            </Listbox.Options>
+          </Transition>
+        </div>
+      </Listbox>
+    </div>
+  )
+}
+
+// 整合的配置选择器组件
+interface ConfigSelectorProps extends ModelSelectorProps, LanguageSelectorProps {}
+
+export const ConfigSelector: React.FC<ConfigSelectorProps> = ({
+  // Model props
+  selectedModel,
+  availableModels,
+  onModelChange,
+  // Language props
+  sourceLanguage,
+  targetLanguage,
+  availableLanguages,
+  onSourceLanguageChange,
+  onTargetLanguageChange,
+  onSwapLanguages,
+  disabled = false
+}) => {
+  // 过滤目标语言列表，排除自动检测选项
+  const targetLanguageOptions = availableLanguages.filter(lang => lang.code !== 'auto')
+  
+  const handleSwap = () => {
+    if (sourceLanguage === 'auto') {
+      return // 不能交换自动检测
+    }
+    onSwapLanguages()
+  }
+
+  return (
+    <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+      <h3 className="text-lg font-medium text-gray-900 mb-4">翻译配置</h3>
+      
+      {/* 语言配置 */}
+      <div className="mb-6">
+        <h4 className="text-sm font-medium text-gray-700 mb-3">语言设置</h4>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+          <LanguageDropdown
+            value={sourceLanguage}
+            options={availableLanguages}
+            onChange={onSourceLanguageChange}
+            disabled={disabled}
+            label="源语言"
+            placeholder="选择源语言"
+          />
+          
+          <LanguageDropdown
+            value={targetLanguage}
+            options={targetLanguageOptions}
+            onChange={onTargetLanguageChange}
+            disabled={disabled}
+            label="目标语言"
+            placeholder="选择目标语言"
+          />
         </div>
         
-        {/* Selection Indicator */}
-        <div className="flex-shrink-0 ml-4">
-          {selected && (
-            <CheckCircleIcon className="w-5 h-5 text-primary-600" />
-          )}
+        {/* 交换按钮 */}
+        <div className="mt-3 flex justify-center">
+          <button
+            onClick={handleSwap}
+            disabled={disabled || sourceLanguage === 'auto'}
+            className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            title={sourceLanguage === 'auto' ? '无法交换：源语言为自动检测' : '交换语言'}
+          >
+            <ArrowsRightLeftIcon className="w-3 h-3 mr-1" />
+            交换
+          </button>
         </div>
+      </div>
+      
+      {/* 模型选择 */}
+      <div>
+        <h4 className="text-sm font-medium text-gray-700 mb-3">模型选择</h4>
+        <RadioGroup value={selectedModel} onChange={onModelChange} disabled={disabled}>
+          <RadioGroup.Label className="sr-only">选择翻译模型</RadioGroup.Label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {availableModels.map((model) => (
+              <RadioGroup.Option
+                key={model.id}
+                value={model.id}
+                disabled={disabled}
+                className="focus:outline-none"
+              >
+                {({ checked }) => (
+                  <div className={`
+                    relative rounded-md border p-3 cursor-pointer transition-all duration-200
+                    ${checked 
+                      ? 'border-primary-500 ring-1 ring-primary-500 bg-primary-50' 
+                      : 'border-gray-300 hover:border-gray-400 bg-white'
+                    }
+                    ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+                  `}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <span className={`text-sm font-medium ${checked ? 'text-primary-900' : 'text-gray-900'}`}>
+                          {model.name}
+                        </span>
+                        {model.id === 'qwen-mt-plus' && (
+                          <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                            推荐
+                          </span>
+                        )}
+                      </div>
+                      {checked && (
+                        <CheckCircleIcon className="w-4 h-4 text-primary-600" />
+                      )}
+                    </div>
+                  </div>
+                )}
+              </RadioGroup.Option>
+            ))}
+          </div>
+        </RadioGroup>
       </div>
     </div>
   )
 }
 
+// 保持原有的ModelSelector组件，但简化版本
 export const ModelSelector: React.FC<ModelSelectorProps> = ({
   selectedModel,
   availableModels,
@@ -74,20 +215,12 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
   disabled = false
 }) => {
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-      <div className="flex items-center space-x-2 mb-4">
-        <h3 className="text-lg font-medium text-gray-900">模型选择</h3>
-        <div className="group relative">
-          <InformationCircleIcon className="w-5 h-5 text-gray-400 cursor-help" />
-          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 p-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
-            选择合适的模型以获得最佳翻译效果。Plus模型提供更高质量，Turbo模型速度更快成本更低。
-          </div>
-        </div>
-      </div>
+    <div className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm">
+      <h3 className="text-base font-medium text-gray-900 mb-3">模型选择</h3>
       
       <RadioGroup value={selectedModel} onChange={onModelChange} disabled={disabled}>
         <RadioGroup.Label className="sr-only">选择翻译模型</RadioGroup.Label>
-        <div className="space-y-4">
+        <div className="space-y-2">
           {availableModels.map((model) => (
             <RadioGroup.Option
               key={model.id}
@@ -96,54 +229,35 @@ export const ModelSelector: React.FC<ModelSelectorProps> = ({
               className="focus:outline-none"
             >
               {({ checked }) => (
-                <ModelCard
-                  model={model}
-                  selected={checked}
-                  disabled={disabled}
-                />
+                <div className={`
+                  relative rounded-md border p-3 cursor-pointer transition-all duration-200
+                  ${checked 
+                    ? 'border-primary-500 ring-1 ring-primary-500 bg-primary-50' 
+                    : 'border-gray-300 hover:border-gray-400 bg-white'
+                  }
+                  ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+                `}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <span className={`text-sm font-medium ${checked ? 'text-primary-900' : 'text-gray-900'}`}>
+                        {model.name}
+                      </span>
+                      {model.id === 'qwen-mt-plus' && (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                          推荐
+                        </span>
+                      )}
+                    </div>
+                    {checked && (
+                      <CheckCircleIcon className="w-4 h-4 text-primary-600" />
+                    )}
+                  </div>
+                </div>
               )}
             </RadioGroup.Option>
           ))}
         </div>
       </RadioGroup>
-      
-      {/* Model Comparison */}
-      <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-        <h4 className="text-sm font-medium text-gray-900 mb-3">模型对比</h4>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-          <div>
-            <h5 className="font-medium text-gray-700 mb-2">Qwen-MT Plus</h5>
-            <ul className="space-y-1 text-gray-600">
-              <li>• 旗舰级翻译质量</li>
-              <li>• 更好的上下文理解</li>
-              <li>• 专业术语准确性高</li>
-              <li>• 适合重要文档翻译</li>
-            </ul>
-          </div>
-          <div>
-            <h5 className="font-medium text-gray-700 mb-2">Qwen-MT Turbo</h5>
-            <ul className="space-y-1 text-gray-600">
-              <li>• 快速响应速度</li>
-              <li>• 低成本高效率</li>
-              <li>• 日常翻译需求</li>
-              <li>• 批量翻译场景</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-      
-      {/* Current Selection Info */}
-      <div className="mt-4 p-3 bg-primary-50 rounded-lg border border-primary-200">
-        <div className="flex items-center space-x-2">
-          <CheckCircleIcon className="w-4 h-4 text-primary-600" />
-          <span className="text-sm text-primary-800">
-            当前选择: {availableModels.find(m => m.id === selectedModel)?.name}
-          </span>
-        </div>
-        <p className="mt-1 text-xs text-primary-700">
-          {availableModels.find(m => m.id === selectedModel)?.description}
-        </p>
-      </div>
     </div>
   )
 }

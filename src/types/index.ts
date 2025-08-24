@@ -1,3 +1,6 @@
+// 支持的模型类型
+export type QwenMTModel = 'qwen-mt-plus' | 'qwen-mt-turbo'
+
 // 翻译记录接口
 export interface TranslationRecord {
   id: string
@@ -5,7 +8,7 @@ export interface TranslationRecord {
   translatedText: string
   sourceLanguage: string
   targetLanguage: string
-  model: string
+  model: QwenMTModel
   timestamp: Date
   tokenUsage?: {
     promptTokens: number
@@ -13,9 +16,6 @@ export interface TranslationRecord {
     totalTokens: number
   }
 }
-
-// 支持的模型类型
-export type QwenMTModel = 'qwen-mt-plus' | 'qwen-mt-turbo'
 
 // 模型信息接口
 export interface ModelInfo {
@@ -163,6 +163,9 @@ export interface TranslationState {
   availableModels: ModelInfo[]
   supportedLanguages: Language[]
   apiRegion: 'beijing' | 'singapore'
+  apiKey: string
+  isAPIKeyValid: boolean
+  isValidatingAPIKey: boolean
   
   // Actions
   setSourceLanguage: (language: string) => void
@@ -178,6 +181,8 @@ export interface TranslationState {
   removeFromHistory: (id: string) => void
   clearHistory: () => void
   setAPIRegion: (region: 'beijing' | 'singapore') => void
+  setAPIKey: (apiKey: string) => Promise<void>
+  validateAPIKey: () => Promise<boolean>
   initializeAPI: () => void
 }
 
@@ -186,4 +191,14 @@ export interface APIConfig {
   apiKey: string
   region: 'beijing' | 'singapore'
   baseURL: string
+}
+
+// API Key设置组件Props
+export interface APIKeySettingsProps {
+  apiKey: string
+  isValid: boolean
+  isValidating: boolean
+  region: 'beijing' | 'singapore'
+  onAPIKeyChange: (apiKey: string) => Promise<void>
+  onValidate: () => Promise<boolean>
 }

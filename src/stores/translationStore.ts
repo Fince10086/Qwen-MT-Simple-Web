@@ -33,6 +33,9 @@ export const useTranslationStore = create<TranslationStore>()(
       availableModels: AVAILABLE_MODELS,
       supportedLanguages: SUPPORTED_LANGUAGES,
       apiRegion: DEFAULT_CONFIG.API_REGION,
+      apiKey: '',
+      isAPIKeyValid: false,
+      isValidatingAPIKey: false,
       
       // Actions
       setSourceLanguage: (language: string) => {
@@ -106,7 +109,15 @@ export const useTranslationStore = create<TranslationStore>()(
         set({ isTranslating: true, error: null })
         
         try {
-          const api = createQwenAPI(undefined, apiRegion)
+          const { apiKey, apiRegion } = state
+          
+          // 检查API Key是否存在
+          if (!apiKey || !apiKey.trim()) {
+            set({ error: '请先在设置中配置API Key' })
+            return
+          }
+          
+          const api = createQwenAPI(apiKey, apiRegion)
           
           const response = await api.translate({
             model: selectedModel,
@@ -196,13 +207,131 @@ export const useTranslationStore = create<TranslationStore>()(
         set({ apiRegion: region, error: null })
       },
       
-      initializeAPI: () => {
-        // 初始化时验证API配置
+      setAPIKey: async (apiKey: string) => {
+        set({ apiKey: apiKey.trim(), error: null })
+        
+        // 如果API Key不为空，自动验证
+        if (apiKey.trim()) {
+          await get().validateAPIKey()
+        } else {
+          set({ isAPIKeyValid: false })
+        }
+      },
+      
+      validateAPIKey: async (): Promise<boolean> => {
+        const { apiKey, apiRegion } = get()
+        
+        if (!apiKey.trim()) {
+          set({ isAPIKeyValid: false, error: 'API Key不能为空' })
+          return false
+        }
+        
+        set({ isValidatingAPIKey: true, error: null })
+        
         try {
-          createQwenAPI(undefined, get().apiRegion)
+          console.log('开始验证API Key...', {
+            apiKeyLength: apiKey.length,
+            region: apiRegion
+          })
+          
+          const api = createQwenAPI(apiKey, apiRegion)
+          const isValid = await api.validateConfig()
+          
+          console.log('API Key验证结果:', isValid)
+          
+          set({ 
+            isAPIKeyValid: isValid,
+            error: isValid ? null : 'API Key验证失败，请检查是否正确'
+          })
+          
+          return isValid
         } catch (error) {
+          console.error('API Key验证过程出错:', error)
+          
           const translationError = error as QwenTranslationError
-          set({ error: translationError.message })
+          let errorMessage = 'API Key验证失败'
+          
+          // 根据错误类型提供更具体的错误信息
+          switch (translationError.type) {
+            case QwenTranslationErrorType.INVALID_API_KEY:
+              errorMessage = 'API Key无效，请检查是否正确输入'
+              break
+            case QwenTranslationErrorType.NETWORK_ERROR:
+              errorMessage = '网络连接失败，请检查网络状态或尝试更换区域'
+              break
+            case QwenTranslationErrorType.API_RATE_LIMIT:
+              errorMessage = 'API调用频率过高，请稍后再试'
+              break
+            case QwenTranslationErrorType.SERVER_ERROR:
+              errorMessage = '服务器错误，请稍后再试或联系技术支持'
+              break
+            default:
+              // 显示具体的错误信息
+              errorMessage = `验证失败: ${translationError.message}`
+              
+              // 如果有HTTP状态码，显示出来
+              if (translationError.statusCode) {
+                errorMessage += ` (HTTP ${translationError.statusCode})`
+              }
+          }
+          
+          console.error('最终错误信息:', errorMessage)
+          
+          set({ 
+            isAPIKeyValid: false, 
+            error: errorMessage 
+          })
+          
+          return false
+        } finally {
+          set({ isValidatingAPIKey: false })
+        }
+      },
+      
+      initializeAPI: async () => {
+        try {
+          const state = get()
+          let { apiKey } = state
+          
+          console.log('初始化API...', {
+            hasStoredKey: !!apiKey,
+            hasEnvKey: !!import.meta.env.VITE_DASHSCOPE_API_KEY
+          })
+          
+          // 如果没有设置API Key，尝试从环境变量获取
+          if (!apiKey && import.meta.env.VITE_DASHSCOPE_API_KEY) {
+            apiKey = import.meta.env.VITE_DASHSCOPE_API_KEY
+            set({ apiKey })
+            console.log('从环境变量加载API Key')
+          }
+          
+          // 初始化时验证API配置（但不阻塞应用启动）
+          if (apiKey && apiKey.trim()) {
+            console.log('开始验证存储的API Key...')
+            // 使用setTimeout避免阻塞应用初始化
+            setTimeout(async () => {
+              try {
+                await get().validateAPIKey()
+              } catch (error) {
+                console.warn('API Key初始化验证失败，但不影响应用启动:', error)
+              }
+            }, 100)
+          } else {
+            // 如果没有API Key，设置提示但不是错误
+            console.log('未找到API Key，需要用户手动配置')
+            // 也使用延迟设置，避免干扰初始化
+            setTimeout(() => {
+              const currentState = get()
+              if (!currentState.apiKey) {
+                set({ error: '请在设置中配置API Key以使用翻译功能' })
+              }
+            }, 500)
+          }
+          
+          console.log('API初始化完成')
+        } catch (error) {
+          console.error('API初始化过程出错:', error)
+          // 不设置错误状态，避免影响应用正常启动
         }
       }
     }),
@@ -214,19 +343,98 @@ export const useTranslationStore = create<TranslationStore>()(
         selectedModel: state.selectedModel,
         sourceLanguage: state.sourceLanguage,
         targetLanguage: state.targetLanguage,
-        apiRegion: state.apiRegion
+        apiRegion: state.apiRegion,
+        apiKey: state.apiKey, // 持久化API Key
+        isAPIKeyValid: state.isAPIKeyValid
       }),
-      version: 1,
+      version: 2, // 增加版本号
       migrate: (persistedState: any, version: number) => {
-        // 版本迁移逻辑
-        if (version === 0) {
-          // 从版本0升级到版本1的逻辑
+        try {
+          // 版本迁移逻辑
+          if (version === 0) {
+            // 从版本0升级到版本1的逻辑
+            persistedState = {
+              ...persistedState,
+              apiRegion: DEFAULT_CONFIG.API_REGION
+            }
+          }
+          
+          if (version <= 1) {
+            // 从版本1升级到版本2：修复历史记录中的时间戳问题
+            if (persistedState.history && Array.isArray(persistedState.history)) {
+              persistedState.history = persistedState.history.map((record: any) => {
+                // 确保timestamp是Date对象
+                if (record.timestamp && typeof record.timestamp === 'string') {
+                  record.timestamp = new Date(record.timestamp)
+                }
+                return record
+              })
+            }
+          }
+          
+          return persistedState
+        } catch (error) {
+          console.error('数据迁移失败，使用默认配置:', error)
+          // 如果迁移失败，返回默认状态
           return {
-            ...persistedState,
-            apiRegion: DEFAULT_CONFIG.API_REGION
+            history: [],
+            selectedModel: DEFAULT_CONFIG.MODEL,
+            sourceLanguage: DEFAULT_CONFIG.SOURCE_LANGUAGE,
+            targetLanguage: DEFAULT_CONFIG.TARGET_LANGUAGE,
+            apiRegion: DEFAULT_CONFIG.API_REGION,
+            apiKey: '',
+            isAPIKeyValid: false
           }
         }
-        return persistedState
+      },
+      // 添加数据验证函数
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          try {
+            // 验证和修复持久化的数据
+            if (state.history && Array.isArray(state.history)) {
+              state.history = state.history.filter((record: any) => {
+                // 检查记录的完整性
+                return record && 
+                       typeof record.id === 'string' &&
+                       typeof record.sourceText === 'string' &&
+                       typeof record.translatedText === 'string' &&
+                       typeof record.sourceLanguage === 'string' &&
+                       typeof record.targetLanguage === 'string'
+              }).map((record: any) => {
+                // 确保timestamp是Date对象
+                if (!(record.timestamp instanceof Date)) {
+                  record.timestamp = new Date(record.timestamp)
+                }
+                return record
+              })
+            }
+            
+            // 验证其他字段
+            if (!state.selectedModel || !AVAILABLE_MODELS.find(m => m.id === state.selectedModel)) {
+              state.selectedModel = DEFAULT_CONFIG.MODEL
+            }
+            
+            if (!state.sourceLanguage || !SUPPORTED_LANGUAGES.find(l => l.code === state.sourceLanguage)) {
+              state.sourceLanguage = DEFAULT_CONFIG.SOURCE_LANGUAGE
+            }
+            
+            if (!state.targetLanguage || !SUPPORTED_LANGUAGES.find(l => l.code === state.targetLanguage)) {
+              state.targetLanguage = DEFAULT_CONFIG.TARGET_LANGUAGE
+            }
+            
+            if (!state.apiRegion || !['beijing', 'singapore'].includes(state.apiRegion)) {
+              state.apiRegion = DEFAULT_CONFIG.API_REGION
+            }
+            
+            console.log('数据恢复成功，历史记录数量:', state.history?.length || 0)
+          } catch (error) {
+            console.error('数据验证失败:', error)
+            // 清理错误数据
+            state.history = []
+            state.error = '数据恢复时发生错误，已重置为默认设置'
+          }
+        }
       }
     }
   )
@@ -271,7 +479,12 @@ export const useTranslationConfig = () => {
     availableModels: state.availableModels,
     supportedLanguages: state.supportedLanguages,
     apiRegion: state.apiRegion,
+    apiKey: state.apiKey,
+    isAPIKeyValid: state.isAPIKeyValid,
+    isValidatingAPIKey: state.isValidatingAPIKey,
     setAPIRegion: state.setAPIRegion,
+    setAPIKey: state.setAPIKey,
+    validateAPIKey: state.validateAPIKey,
     initializeAPI: state.initializeAPI
   }))
 }

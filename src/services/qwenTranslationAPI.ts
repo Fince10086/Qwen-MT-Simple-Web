@@ -232,23 +232,72 @@ export class QwenTranslationAPI {
    */
   async validateConfig(): Promise<boolean> {
     try {
-      // 发送一个简单的测试请求来验证API Key
-      await this.translate({
+      console.log('开始验证API Key...', {
+        region: this.config.region,
+        baseURL: this.config.baseURL,
+        apiKeyLength: this.config.apiKey.length,
+        apiKeyPrefix: this.config.apiKey.substring(0, 10) + '...'
+      })
+      
+      // 使用更简单的请求来验证API Key
+      const testRequest = {
         model: 'qwen-mt-turbo',
-        messages: [{ role: 'user', content: 'test' }],
+        messages: [{ role: 'user', content: 'hello' }],
         translation_options: {
           source_lang: 'en',
           target_lang: 'zh'
-        }
+        },
+        max_tokens: 10  // 限制token数量以降低成本
+      }
+      
+      console.log('发送验证请求:', testRequest)
+      
+      const response = await fetch(`${this.config.baseURL}${API_CONFIG.CHAT_COMPLETIONS_ENDPOINT}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${this.config.apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(testRequest)
       })
+      
+      console.log('验证响应状态:', response.status, response.statusText)
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        console.error('验证失败，错误详情:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorData
+        })
+        
+        // 抛出详细错误以便上层处理
+        throw {
+          response: {
+            status: response.status,
+            data: errorData
+          }
+        }
+      }
+      
+      const result = await response.json()
+      console.log('验证成功，API响应:', result)
+      
       return true
     } catch (error) {
-      const translationError = error as QwenTranslationError
+      console.error('API Key验证过程中发生错误:', error)
+      
+      const translationError = handleQwenAPIError(error)
+      console.error('处理后的错误:', translationError)
+      
+      // 只有在确实是API Key无效时才返回false
       if (translationError.type === QwenTranslationErrorType.INVALID_API_KEY) {
         return false
       }
-      // 其他错误不影响配置验证
-      return true
+      
+      // 对于其他类型的错误，我们假设API Key是有效的，但存在其他问题
+      console.warn('验证过程中遇到非API Key相关错误，假设API Key有效')
+      throw translationError  // 抛出错误以便上层显示具体错误信息
     }
   }
   
@@ -273,13 +322,14 @@ export const createQwenAPI = (
   apiKey?: string, 
   region?: 'beijing' | 'singapore'
 ): QwenTranslationAPI => {
+  // 优先使用传入的apiKey，再考虑环境变量
   const key = apiKey || import.meta.env.VITE_DASHSCOPE_API_KEY
   const apiRegion = region || import.meta.env.VITE_API_REGION || 'beijing'
   
   if (!key) {
     throw new QwenTranslationError(
       QwenTranslationErrorType.INVALID_API_KEY,
-      'API Key is required. Please set VITE_DASHSCOPE_API_KEY in your environment variables.'
+      'API Key is required. Please provide an API Key or set VITE_DASHSCOPE_API_KEY in your environment variables.'
     )
   }
   

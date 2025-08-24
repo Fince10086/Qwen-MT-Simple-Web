@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from 'react'
-import Header from './components/Header'
-import Footer from './components/Footer'
-import LanguageSelector from './components/LanguageSelector'
-import ModelSelector from './components/ModelSelector'
+import { ConfigSelector } from './components/ModelSelector'
 import TranslationPanel from './components/TranslationPanel'
 import HistoryPanel from './components/HistoryPanel'
 import ErrorBoundary from './components/ErrorBoundary'
+import APIKeySettings from './components/APIKeySettings'
 import { useTranslationStore } from './stores/translationStore'
+import { useAppInitialization } from './hooks'
 import { TranslationRecord } from './types'
-import { ExclamationTriangleIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { ExclamationTriangleIcon, XMarkIcon, CogIcon } from '@heroicons/react/24/outline'
 
 // 错误提示组件
 interface ErrorAlertProps {
@@ -40,7 +39,11 @@ const ErrorAlert: React.FC<ErrorAlertProps> = ({ message, onClose }) => {
 }
 
 // 主容器组件
-const TranslationContainer: React.FC = () => {
+interface TranslationContainerProps {
+  onShowSettings: () => void
+}
+
+const TranslationContainer: React.FC<TranslationContainerProps> = ({ onShowSettings }) => {
   const {
     sourceLanguage,
     targetLanguage,
@@ -52,6 +55,8 @@ const TranslationContainer: React.FC = () => {
     error,
     availableModels,
     supportedLanguages,
+    apiKey,
+    isAPIKeyValid,
     setSourceLanguage,
     setTargetLanguage,
     setSelectedModel,
@@ -61,14 +66,27 @@ const TranslationContainer: React.FC = () => {
     clearTranslation,
     removeFromHistory,
     clearHistory,
-    setError,
-    initializeAPI
+    setError
   } = useTranslationStore()
   
-  // 初始化API
+  // 使用安全初始化Hook
+  useAppInitialization()
+  
+  // 监听存储重置事件
   useEffect(() => {
-    initializeAPI()
-  }, [initializeAPI])
+    const handleStorageReset = (event: CustomEvent) => {
+      console.log('存储重置事件:', event.detail)
+      if (event.detail.reason === 'corrupted-data') {
+        setError('检测到数据损坏，已重置为默认设置，请重新配置API Key')
+      }
+    }
+    
+    window.addEventListener('storage-reset', handleStorageReset as EventListener)
+    
+    return () => {
+      window.removeEventListener('storage-reset', handleStorageReset as EventListener)
+    }
+  }, [setError])
   
   // 处理历史记录项点击
   const handleHistoryItemClick = (record: TranslationRecord) => {
@@ -82,7 +100,7 @@ const TranslationContainer: React.FC = () => {
   
   return (
     <div className="min-h-screen bg-gray-50">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-6xl mx-auto px-3 sm:px-4 lg:px-6 py-4">
         {/* 错误提示 */}
         {error && (
           <ErrorAlert
@@ -91,30 +109,54 @@ const TranslationContainer: React.FC = () => {
           />
         )}
         
-        <div className="space-y-8">
-          {/* 欢迎信息 */}
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl">
+        <div className="space-y-6">
+          {/* 欢迎信息和设置 */}
+          <div className="text-center relative">
+            <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl">
               Qwen-MT 智能翻译
             </h1>
-            <p className="mt-3 max-w-md mx-auto text-lg text-gray-500 sm:text-xl sm:max-w-3xl">
+            <p className="mt-2 max-w-md mx-auto text-base text-gray-500 sm:text-lg sm:max-w-2xl">
               基于通义千问模型的多语言翻译服务，支持92种语言互译
             </p>
+            
+            {/* 设置按钮 */}
+            <button
+              onClick={onShowSettings}
+              className="absolute top-0 right-0 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+              title="设置"
+            >
+              <CogIcon className="w-5 h-5" />
+            </button>
           </div>
           
           {/* 配置区域 */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <LanguageSelector
+          <div className="max-w-3xl mx-auto space-y-3">
+            {/* API Key 状态提示 */}
+            {(!apiKey || !isAPIKeyValid) && (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+                <div className="flex items-center space-x-2">
+                  <ExclamationTriangleIcon className="w-5 h-5 text-amber-500" />
+                  <div className="flex-1">
+                    <p className="text-sm text-amber-800">
+                      {!apiKey 
+                        ? '请在设置中配置API Key以使用翻译服务'
+                        : 'API Key无效，请检查配置'
+                      }
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            <ConfigSelector
+              // Language props
               sourceLanguage={sourceLanguage}
               targetLanguage={targetLanguage}
               availableLanguages={supportedLanguages}
               onSourceLanguageChange={setSourceLanguage}
               onTargetLanguageChange={setTargetLanguage}
               onSwapLanguages={swapLanguages}
-              disabled={isTranslating}
-            />
-            
-            <ModelSelector
+              // Model props
               selectedModel={selectedModel}
               availableModels={availableModels}
               onModelChange={setSelectedModel}
@@ -130,7 +172,7 @@ const TranslationContainer: React.FC = () => {
             onSourceTextChange={setSourceText}
             onTranslate={translate}
             onClear={clearTranslation}
-            disabled={false}
+            disabled={!apiKey || !isAPIKeyValid}
           />
           
           {/* 历史记录面板 */}
@@ -146,59 +188,100 @@ const TranslationContainer: React.FC = () => {
   )
 }
 
-// 设置面板组件（简化版）
+// 设置面板组件（完整版）
 const SettingsPanel: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-  const { apiRegion, setAPIRegion } = useTranslationStore()
+  const { 
+    apiRegion, 
+    apiKey,
+    isAPIKeyValid,
+    isValidatingAPIKey,
+    setAPIRegion,
+    setAPIKey,
+    validateAPIKey
+  } = useTranslationStore()
   
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium text-gray-900">设置</h3>
+      <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-semibold text-gray-900">设置</h3>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-400 hover:text-gray-600 transition-colors"
           >
-            <XMarkIcon className="w-5 h-5" />
+            <XMarkIcon className="w-6 h-6" />
           </button>
         </div>
         
-        <div className="space-y-4">
+        <div className="space-y-6">
+          {/* API Key 设置 */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              API 区域
-            </label>
-            <select
-              value={apiRegion}
-              onChange={(e) => setAPIRegion(e.target.value as 'beijing' | 'singapore')}
-              className="select-field"
-            >
-              <option value="beijing">北京 (中国大陆)</option>
-              <option value="singapore">新加坡 (国际)</option>
-            </select>
-            <p className="mt-1 text-sm text-gray-500">
-              选择距离您最近的API服务区域以获得更好的性能
-            </p>
+            <h4 className="text-lg font-medium text-gray-900 mb-4">API Key 配置</h4>
+            <APIKeySettings
+              apiKey={apiKey}
+              isValid={isAPIKeyValid}
+              isValidating={isValidatingAPIKey}
+              region={apiRegion}
+              onAPIKeyChange={setAPIKey}
+              onValidate={validateAPIKey}
+            />
           </div>
           
-          <div className="pt-4 border-t border-gray-200">
-            <h4 className="text-sm font-medium text-gray-900 mb-2">环境变量配置</h4>
-            <div className="bg-gray-50 p-3 rounded text-sm">
-              <p className="text-gray-600 mb-2">请在 .env 文件中配置：</p>
-              <code className="block text-gray-800">
+          {/* 分隔线 */}
+          <div className="border-t border-gray-200" />
+          
+          {/* API 区域设置 */}
+          <div>
+            <h4 className="text-lg font-medium text-gray-900 mb-4">API 区域</h4>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                服务区域
+              </label>
+              <select
+                value={apiRegion}
+                onChange={(e) => setAPIRegion(e.target.value as 'beijing' | 'singapore')}
+                className="select-field"
+              >
+                <option value="beijing">北京 (中国大陆)</option>
+                <option value="singapore">新加坡 (国际)</option>
+              </select>
+              <p className="mt-2 text-sm text-gray-500">
+                选择距离您最近的API服务区域以获得更好的性能
+              </p>
+            </div>
+          </div>
+          
+          {/* 分隔线 */}
+          <div className="border-t border-gray-200" />
+          
+          {/* 环境变量配置提示 */}
+          <div>
+            <h4 className="text-lg font-medium text-gray-900 mb-4">环境变量配置</h4>
+            <div className="bg-gray-50 p-4 rounded-lg">
+              <p className="text-sm text-gray-600 mb-3">您也可以在 .env 文件中配置：</p>
+              <code className="block text-sm text-gray-800 bg-white p-3 rounded border">
                 VITE_DASHSCOPE_API_KEY=your_api_key_here<br />
                 VITE_API_REGION={apiRegion}
               </code>
+              <p className="mt-3 text-xs text-gray-500">
+                注意：网页设置优先级高于环境变量配置
+              </p>
             </div>
           </div>
         </div>
         
-        <div className="mt-6 flex justify-end">
+        <div className="mt-8 flex justify-end space-x-3">
+          <button
+            onClick={onClose}
+            className="btn-secondary"
+          >
+            取消
+          </button>
           <button
             onClick={onClose}
             className="btn-primary"
           >
-            确定
+            完成
           </button>
         </div>
       </div>
@@ -212,14 +295,8 @@ const App: React.FC = () => {
   
   return (
     <ErrorBoundary>
-      <div className="min-h-screen flex flex-col">
-        <Header onSettingsClick={() => setShowSettings(true)} />
-        
-        <div className="flex-1">
-          <TranslationContainer />
-        </div>
-        
-        <Footer />
+      <div className="min-h-screen">
+        <TranslationContainer onShowSettings={() => setShowSettings(true)} />
         
         {showSettings && (
           <SettingsPanel onClose={() => setShowSettings(false)} />
