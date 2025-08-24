@@ -29,6 +29,21 @@ export const SettingsPanel: React.FC = () => {
           设置
         </h3>
       </div>
+
+        {/* API 区域设置 */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            服务区域
+          </label>
+          <select
+            value={apiRegion}
+            onChange={(e) => setAPIRegion(e.target.value as 'beijing' | 'singapore')}
+            className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors hover:border-gray-300"
+          >
+            <option value="beijing">北京（大陆）</option>
+            <option value="singapore">新加坡（国际）</option>
+          </select>
+        </div>
       
       {/* API Key 配置 */}
       <div className="space-y-4">
@@ -49,30 +64,6 @@ export const SettingsPanel: React.FC = () => {
       {/* 语言设置 */}
       <div className="space-y-4">
         <LanguageSettings />
-      </div>
-      
-      {/* API 区域设置 */}
-      <div className="space-y-4">
-        <h4 className="text-base font-medium text-gray-900 flex items-center">
-          <GlobeAltIcon className="w-4 h-4 mr-2 text-blue-600" />
-          API 区域
-        </h4>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            服务区域
-          </label>
-          <select
-            value={apiRegion}
-            onChange={(e) => setAPIRegion(e.target.value as 'beijing' | 'singapore')}
-            className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors hover:border-gray-300"
-          >
-            <option value="beijing">北京 (中国大陆)</option>
-            <option value="singapore">新加坡 (国际)</option>
-          </select>
-          <p className="mt-2 text-sm text-gray-500">
-            选择距离您最近的API服务区域以获得更好的性能
-          </p>
-        </div>
       </div>
       
       {/* 环境变量配置提示 */}

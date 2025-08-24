@@ -6,7 +6,9 @@ import {
   ExclamationCircleIcon,
   ClockIcon,
   SignalIcon,
-  WrenchScrewdriverIcon
+  WrenchScrewdriverIcon,
+  ChevronDownIcon,
+  ChevronRightIcon
 } from '@heroicons/react/24/outline'
 import { APIKeySettingsProps } from '../types'
 import APIDiagnostics from './APIDiagnostics'
@@ -22,6 +24,7 @@ const APIKeySettings: React.FC<APIKeySettingsProps> = ({
   const [showAPIKey, setShowAPIKey] = useState(false)
   const [inputValue, setInputValue] = useState(apiKey)
   const [showDiagnostics, setShowDiagnostics] = useState(false)
+  const [showHelp, setShowHelp] = useState(false)
 
   const handleTestConnection = async () => {
     if (inputValue.trim()) {
@@ -174,41 +177,63 @@ const APIKeySettings: React.FC<APIKeySettingsProps> = ({
         </div>
       </div>
       
-      {/* API Key格式提示 */}
-      <div className="bg-blue-50 p-4 rounded-lg">
-        <h4 className="text-sm font-medium text-blue-900 mb-2">API Key 格式说明</h4>
-        <div className="text-sm text-blue-800 space-y-1">
-          <p>• API Key 通常以 "sk-" 开头，长度约为 50-100 个字符</p>
-          <p>• 确保复制完整的 API Key，不要包含多余的空格</p>
-          <p>• 如果验证失败，请检查：</p>
-          <div className="ml-4 space-y-1 text-xs">
-            <p>- API Key 是否正确复制</p>
-            <p>- 账户是否有足够的余额</p>
-            <p>- 所选区域是否正确</p>
-            <p>- 网络连接是否正常</p>
+      {/* API Key 帮助信息 */}
+      <div className="border border-gray-200 rounded-lg">
+        <button
+          onClick={() => setShowHelp(!showHelp)}
+          className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors duration-200"
+        >
+          <div className="flex items-center space-x-2">
+            <span className="text-sm font-medium text-gray-700">API Key 使用说明</span>
+            <span className="text-xs text-gray-500">(点击查看详细信息)</span>
           </div>
-        </div>
-      </div>
-      
-      {/* API Key获取指引 */}
-      <div className="bg-green-50 p-4 rounded-lg">
-        <h4 className="text-sm font-medium text-green-900 mb-2">如何获取 API Key？</h4>
-        <div className="text-sm text-green-800 space-y-1">
-          <p>1. 访问 <a href="https://dashscope.aliyun.com/" target="_blank" rel="noopener noreferrer" className="underline hover:text-green-600">阿里云百炼控制台</a></p>
-          <p>2. 登录/注册阿里云账号</p>
-          <p>3. 在控制台中创建应用并获取 API Key</p>
-          <p>4. 确保账户有足够的额度使用翻译服务</p>
-        </div>
-      </div>
-      
-      {/* 安全提示 */}
-      <div className="bg-yellow-50 p-4 rounded-lg">
-        <h4 className="text-sm font-medium text-yellow-800 mb-2">安全提示</h4>
-        <div className="text-sm text-yellow-700 space-y-1">
-          <p>• API Key 将安全存储在您的浏览器本地</p>
-          <p>• 不要在公共场所或不安全的网络环境下输入 API Key</p>
-          <p>• 建议定期更换 API Key 以确保安全</p>
-        </div>
+          {showHelp ? (
+            <ChevronDownIcon className="w-4 h-4 text-gray-500" />
+          ) : (
+            <ChevronRightIcon className="w-4 h-4 text-gray-500" />
+          )}
+        </button>
+        
+        {showHelp && (
+          <div className="border-t border-gray-200 p-4 space-y-4">
+              <h4 className="text-sm font-medium text-blue-900 mb-2 flex items-center">
+                <ExclamationCircleIcon className="w-4 h-4 mr-2" />
+                格式
+              </h4>
+              <div className="text-sm text-blue-900 space-y-1">
+                <p>• API Key 通常以 "sk-" 开头，长度约为 50-100 个字符</p>
+                <p>• 确保复制完整的 API Key，不要包含多余的空格</p>
+                <p>• 如果验证失败，请检查：</p>
+                <div className="ml-4 space-y-1 text-xs">
+                  <p>- API Key 是否正确复制</p>
+                  <p>- 账户是否有足够的余额</p>
+                  <p>- 所选区域是否正确</p>
+                  <p>- 网络连接是否正常</p>
+                </div>
+              </div>
+            
+              <h4 className="text-sm font-medium text-green-900 mb-2 flex items-center">
+                <CheckCircleIcon className="w-4 h-4 mr-2" />
+                获取
+              </h4>
+              <div className="text-sm text-green-900 space-y-1">
+                <p>1. 访问 <a href="https://dashscope.aliyun.com/" target="_blank" rel="noopener noreferrer" className="underline hover:text-green-600">阿里云百炼控制台</a></p>
+                <p>2. 登录/注册阿里云账号</p>
+                <p>3. 在控制台中创建应用并获取 API Key</p>
+                <p>4. 确保账户有足够的免费或付费额度使用翻译服务</p>
+              </div>
+            
+              <h4 className="text-sm font-medium text-yellow-900 mb-2 flex items-center">
+                <WrenchScrewdriverIcon className="w-4 h-4 mr-2" />
+                安全提示
+              </h4>
+              <div className="text-sm text-yellow-900 space-y-1">
+                <p>• API Key 将安全存储在您的浏览器本地</p>
+                <p>• 不要在公共场所或不安全的网络环境下输入 API Key</p>
+                <p>• 建议定期更换 API Key 以确保安全</p>
+              </div>
+          </div>
+        )}
       </div>
       
       {/* 诊断工具 */}
