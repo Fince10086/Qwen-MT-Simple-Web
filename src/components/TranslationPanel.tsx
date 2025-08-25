@@ -11,7 +11,6 @@ import {
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline'
 import { Language, QwenMTModel, ModelInfo } from '../types'
-import { DEFAULT_CONFIG } from '../utils/constants'
 
 interface TranslationPanelProps {
   // 文本相关
@@ -363,10 +362,6 @@ export const TranslationPanel: React.FC<TranslationPanelProps> = ({
   const translatedTextHeight = calculateTextBoxHeight(translatedText)
   const unifiedHeight = Math.max(sourceTextHeight, translatedTextHeight)
   
-  const textLength = sourceText.length
-  const maxLength = DEFAULT_CONFIG.MAX_TEXT_LENGTH
-  const isTextTooLong = textLength > maxLength
-  
   // 过滤目标语言列表，排除自动选项
   const targetLanguageOptions = availableLanguages.filter(lang => lang.code !== 'auto')
   const selectedSourceLang = availableLanguages.find(lang => lang.code === sourceLanguage)
@@ -478,52 +473,14 @@ export const TranslationPanel: React.FC<TranslationPanelProps> = ({
                   onKeyDown={handleKeyDown}
                   disabled={disabled}
                   placeholder="请输入要翻译的文本……"
-                  className={`
-                    w-full px-6 py-4 pb-12 bg-white border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-300 placeholder:text-gray-400 resize-none text-base leading-relaxed custom-scrollbar
-                    ${isTextTooLong 
-                      ? 'border-red-300 focus:border-red-500 bg-red-50' 
-                      : 'hover:border-gray-300'
-                    }
-                    ${disabled ? 'bg-gray-50 cursor-not-allowed' : ''}
-                  `}
+                  className="w-full px-6 py-4 pb-12 bg-white border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-300 placeholder:text-gray-400 resize-none text-base leading-relaxed custom-scrollbar hover:border-gray-300 disabled:bg-gray-50 disabled:cursor-not-allowed"
                   style={{ 
                     minHeight: '220px',
                     height: unifiedHeight + 'px',
                     maxHeight: '600px'
                   }}
-                  maxLength={maxLength}
-                  aria-describedby="source-text-help source-text-stats"
-                  aria-invalid={isTextTooLong ? 'true' : 'false'}
                   spellCheck="true"
                 />
-                
-                {/* 左下角文本统计 */}
-                <div id="source-text-stats" className="absolute bottom-3 left-4 flex items-center space-x-4">
-                  <span className={`text-xs font-medium ${
-                    isTextTooLong ? 'text-red-500' : 'text-gray-500'
-                  }`}>
-                    {textLength.toLocaleString()}/{maxLength.toLocaleString()}
-                  </span>
-                  {isTextTooLong && (
-                    <div className="flex items-center space-x-1 text-red-500" role="alert">
-                      <ExclamationTriangleIcon className="w-3 h-3" aria-hidden="true" />
-                      <span className="text-xs">超出限制</span>
-                    </div>
-                  )}
-                </div>
-                
-                {/* 右下角操作提示 */}
-                <div id="source-text-help" className="absolute bottom-3 right-4 flex items-center space-x-2">
-                  {isTranslating && (
-                    <div className="flex items-center space-x-1 text-blue-600" role="status" aria-live="polite">
-                      <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" aria-hidden="true" />
-                      <span className="text-xs font-medium">分析中</span>
-                    </div>
-                  )}
-                  <div className="text-xs font-medium text-gray-500" aria-label="快捷键提示">
-                    Ctrl+Enter 快速翻译
-                  </div>
-                </div>
               </div>
             </div>
             
@@ -561,10 +518,7 @@ export const TranslationPanel: React.FC<TranslationPanelProps> = ({
               <div className="relative">
                 <div 
                   id="translation-result"
-                  className={`
-                    w-full px-6 py-4 pb-12 bg-white border border-gray-200 rounded-2xl transition-all duration-300 overflow-y-auto custom-scrollbar
-                    ${translatedText ? 'border-emerald-200 bg-emerald-50' : 'bg-gray-50'}
-                  `}
+                  className="w-full px-6 py-4 pb-12 bg-white border border-gray-200 rounded-2xl transition-all duration-300 overflow-y-auto custom-scrollbar"
                   style={{ 
                     minHeight: '220px',
                     height: unifiedHeight + 'px',
@@ -584,7 +538,7 @@ export const TranslationPanel: React.FC<TranslationPanelProps> = ({
                       </div>
                     </div>
                   ) : (
-                    <div className="min-h-[188px] pb-8">
+                    <div className="min-h-[188px]">
                       {translatedText ? (
                         <p className="text-gray-900 whitespace-pre-wrap break-words leading-relaxed text-base">
                           {translatedText}
@@ -601,10 +555,10 @@ export const TranslationPanel: React.FC<TranslationPanelProps> = ({
                     </div>
                   )}
                 </div>
-                
+
                 {/* 底部统计信息 */}
                 {translatedText && (
-                  <div className="absolute bottom-3 left-4 flex items-center space-x-4">
+                  <div className="absolute bottom-3 left-4 flex items-center space-x-4 z-10">
                     <span className="text-xs font-medium text-gray-500" aria-label={`翻译结果长度${translatedText.length}个字符`}>{translatedText.length.toLocaleString()} 字符</span>
                   </div>
                 )}
@@ -616,7 +570,7 @@ export const TranslationPanel: React.FC<TranslationPanelProps> = ({
           <div className="flex flex-col sm:flex-row items-center justify-center pt-6 lg:pt-8 border-t border-gray-200 mt-6 lg:mt-8 space-y-4 sm:space-y-0 sm:space-x-6" role="group" aria-label="翻译操作按钮">
             <ActionButton
               onClick={onTranslate}
-              disabled={disabled || isTranslating || !sourceText.trim() || isTextTooLong}
+              disabled={disabled || isTranslating || !sourceText.trim()}
               variant="primary"
               size="lg"
             >

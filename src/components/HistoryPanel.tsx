@@ -12,7 +12,7 @@ import {
   ExclamationTriangleIcon
 } from '@heroicons/react/24/outline'
 import { HistoryPanelProps, TranslationRecord } from '../types'
-import { announceToScreenReader, focusAndAnnounce } from '../utils/accessibility'
+import { announceToScreenReader } from '../utils/accessibility'
 
 // 确认对话框组件
 interface ConfirmDialogProps {

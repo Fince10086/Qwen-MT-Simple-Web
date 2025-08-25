@@ -118,11 +118,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
             }}
           />
         </div>
-
-        {/* 底部装饰 */}
-        <div className="flex-shrink-0 p-4">
-          <div className="w-full h-1 bg-white rounded-full opacity-60"></div>
-        </div>
       </nav>
 
       {/* 移动端底栏 */}

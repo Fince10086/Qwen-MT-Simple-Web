@@ -6,6 +6,7 @@ import {
   XMarkIcon
 } from '@heroicons/react/24/outline'
 import { useTranslationStore } from '../stores/translationStore'
+import { DEFAULT_ENABLED_LANGUAGES } from '../utils/constants'
 
 export const LanguageSettings: React.FC = () => {
   const { 
@@ -45,10 +46,7 @@ export const LanguageSettings: React.FC = () => {
   
   // 重置为默认语言
   const handleReset = () => {
-    // 导入默认语言列表
-    import('../utils/constants').then(({ DEFAULT_ENABLED_LANGUAGES }) => {
-      setEnabledLanguages(DEFAULT_ENABLED_LANGUAGES)
-    })
+    setEnabledLanguages(DEFAULT_ENABLED_LANGUAGES)
   }
   
   // 选择全部语言
