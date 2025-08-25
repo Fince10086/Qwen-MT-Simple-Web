@@ -94,7 +94,6 @@ interface LanguageButtonProps {
   onChange: (language: string) => void
   disabled?: boolean
   label: string
-  dotColor: string
 }
 
 const LanguageButton: React.FC<LanguageButtonProps> = ({
@@ -102,20 +101,18 @@ const LanguageButton: React.FC<LanguageButtonProps> = ({
   options,
   onChange,
   disabled = false,
-  label,
-  dotColor
+  label
 }) => {
   return (
     <Listbox value={language?.code || ''} onChange={onChange} disabled={disabled}>
       <div className="relative">
         <Listbox.Label className="sr-only">{label}选择</Listbox.Label>
         <Listbox.Button 
-          className="group flex items-center space-x-2 lg:space-x-3 bg-white rounded-xl px-3 lg:px-4 py-2.5 lg:py-3 border border-gray-200 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed min-w-[120px] lg:min-w-[140px] justify-center transform hover:scale-[1.02] disabled:hover:scale-100 shadow-sm hover:shadow-md"
+          className="group flex items-center space-x-2 lg:space-x-3 bg-white rounded-xl px-2 lg:px-3 py-2.5 lg:py-3 border border-gray-200 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed min-w-[80px] lg:min-w-[100px] justify-center transform hover:scale-[1.02] disabled:hover:scale-10"
           aria-label={`当前${label}: ${language?.name || '未选择'}`}
           aria-haspopup="listbox"
           aria-expanded={false}
         >
-          <div className={`w-2 lg:w-2.5 h-2 lg:h-2.5 ${dotColor} rounded-full group-hover:scale-110 transition-transform duration-200`} aria-hidden="true"></div>
           <span className="text-xs lg:text-sm font-medium text-gray-700 group-hover:text-gray-900 transition-colors duration-200 truncate">
             {language?.name || label}
           </span>
@@ -131,7 +128,7 @@ const LanguageButton: React.FC<LanguageButtonProps> = ({
           leaveFrom="opacity-100 translate-y-0 scale-100"
           leaveTo="opacity-0 translate-y-1 scale-95"
         >
-          <Listbox.Options className="absolute z-30 mt-2 w-full max-w-xs min-w-[200px] bg-white rounded-xl border border-gray-200 shadow-xl backdrop-blur-sm bg-white/95 focus:outline-none left-1/2 transform -translate-x-1/2">
+          <Listbox.Options className="absolute z-30 mt-2 w-full max-w-[160px] min-w-[140px] bg-white rounded-xl border border-gray-200 backdrop-blur-sm bg-white/95 focus:outline-none left-1/2 transform -translate-x-1/2">
             <div className="max-h-64 overflow-y-auto py-2 custom-scrollbar" role="listbox" aria-label={`${label}选项列表`}>
               {options.map((lang) => (
                 <Listbox.Option
@@ -152,9 +149,7 @@ const LanguageButton: React.FC<LanguageButtonProps> = ({
                           selected ? 'font-semibold' : 'font-normal'
                         }`}>
                           {lang.name}
-                          {lang.code === 'auto' && (
-                            <span className="ml-2 text-xs text-gray-500">(自动检测)</span>
-                          )}
+                          {lang.code === 'auto'}
                         </span>
                       </div>
                       {selected && (
@@ -197,13 +192,13 @@ const ModelToggle: React.FC<ModelToggleProps> = ({
   const selectedIndex = availableModels.findIndex(model => model.id === selectedModel)
   
   return (
-    <div className="relative flex items-center bg-gray-100 rounded-full p-1 border border-gray-200 shadow-sm" role="radiogroup" aria-label="选择翻译模型">
+    <div className="relative flex items-center bg-gray-100 rounded-full p-1 border border-gray-200 w-[160px]" role="radiogroup" aria-label="选择翻译模型">
       {/* 滑动背景 */}
       <div 
-        className={`absolute top-1 bottom-1 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full transition-all duration-300 ease-out shadow-md z-0`}
+        className={`absolute top-1 bottom-1 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full transition-all duration-300 ease-out z-0`}
         style={{
-          width: `calc(50% - 2px)`,
-          left: selectedIndex === 0 ? '2px' : `calc(50% + 0px)`,
+          width: `calc(50% - 4px)`,
+          left: selectedIndex === 0 ? '4px' : `calc(50% + 0px)`,
         }}
         aria-hidden="true"
       />
@@ -232,11 +227,6 @@ const ModelToggle: React.FC<ModelToggleProps> = ({
           >
             <span className="flex items-center space-x-1">
               <span>{getModelDisplayName(model.id)}</span>
-              {model.id === 'qwen-mt-plus' && (
-                <span className={`text-xs ${
-                  isSelected ? 'text-yellow-200' : 'text-yellow-600'
-                }`} aria-hidden="true">★</span>
-              )}
             </span>
           </button>
         )
@@ -290,7 +280,7 @@ export const UnifiedTranslationPanel: React.FC<UnifiedTranslationPanelProps> = (
   
   const handleSwap = () => {
     if (sourceLanguage === 'auto') {
-      return // 不能交换自动检测
+      return // 不能交换自动
     }
     onSwapLanguages()
   }
@@ -326,7 +316,7 @@ export const UnifiedTranslationPanel: React.FC<UnifiedTranslationPanelProps> = (
   const maxLength = DEFAULT_CONFIG.MAX_TEXT_LENGTH
   const isTextTooLong = textLength > maxLength
   
-  // 过滤目标语言列表，排除自动检测选项
+  // 过滤目标语言列表，排除自动选项
   const targetLanguageOptions = availableLanguages.filter(lang => lang.code !== 'auto')
   const selectedSourceLang = availableLanguages.find(lang => lang.code === sourceLanguage)
   const selectedTargetLang = targetLanguageOptions.find(lang => lang.code === targetLanguage)
@@ -339,28 +329,27 @@ export const UnifiedTranslationPanel: React.FC<UnifiedTranslationPanelProps> = (
         <div className="bg-gray-50 px-4 lg:px-8 py-4 lg:py-6 border-b border-gray-200">
           <div className="flex flex-col space-y-4">
             {/* 语言选择区域 */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-3 sm:space-y-0">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row items-center sm:items-center justify-center sm:justify-between space-y-3 sm:space-y-0">
+              <div className="flex flex-col sm:flex-row items-center sm:items-center space-y-3 sm:space-y-0 sm:space-x-3 w-full sm:w-auto">
                 {/* 语言选择按钮 */}
-                <div className="flex items-center space-x-2 w-full sm:w-auto">
+                <div className="flex flex-col xs:flex-row items-center xs:items-center space-y-2 xs:space-y-0 xs:space-x-2 w-full sm:w-auto justify-center">
                   <LanguageButton
                     language={selectedSourceLang}
                     options={availableLanguages}
                     onChange={onSourceLanguageChange}
                     disabled={disabled}
                     label="源语言"
-                    dotColor="bg-blue-500"
                   />
                   
                   <button
                     onClick={handleSwap}
                     disabled={disabled || sourceLanguage === 'auto'}
-                    className="p-2 lg:p-3 text-gray-400 hover:text-blue-600 hover:bg-white/80 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 disabled:hover:scale-100 shadow-sm hover:shadow-md flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                    aria-label={sourceLanguage === 'auto' ? '无法交换：源语言为自动检测' : '交换源语言和目标语言'}
-                    title={sourceLanguage === 'auto' ? '无法交换：源语言为自动检测' : '交换语言'}
+                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-white/80 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 disabled:hover:scale-100 hover:ring-1 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    aria-label={sourceLanguage === 'auto' ? '无法交换：源语言为自动' : '交换源语言和目标语言'}
+                    title={sourceLanguage === 'auto' ? '无法交换：源语言为自动' : '交换语言'}
                     type="button"
                   >
-                    <ArrowsRightLeftIcon className="w-4 h-4 lg:w-5 lg:h-5" aria-hidden="true" />
+                    <ArrowsRightLeftIcon className="w-4 h-4" aria-hidden="true" />
                   </button>
                   
                   <LanguageButton
@@ -369,13 +358,12 @@ export const UnifiedTranslationPanel: React.FC<UnifiedTranslationPanelProps> = (
                     onChange={onTargetLanguageChange}
                     disabled={disabled}
                     label="目标语言"
-                    dotColor="bg-emerald-500"
                   />
                 </div>
               </div>
               
               {/* 模型选择 */}
-              <div className="w-full sm:w-auto">
+              <div className="flex justify-center w-full sm:w-auto">
                 <ModelToggle
                   selectedModel={selectedModel}
                   availableModels={availableModels}
@@ -481,7 +469,7 @@ export const UnifiedTranslationPanel: React.FC<UnifiedTranslationPanelProps> = (
                       <span className="text-xs font-medium">分析中</span>
                     </div>
                   )}
-                  <div className="text-xs text-gray-400 bg-white/80 backdrop-blur-sm px-2 py-1 rounded-md border border-gray-200" aria-label="快捷键提示">
+                  <div className="text-xs font-medium text-gray-500" aria-label="快捷键提示">
                     Ctrl+Enter 快速翻译
                   </div>
                 </div>
@@ -566,11 +554,7 @@ export const UnifiedTranslationPanel: React.FC<UnifiedTranslationPanelProps> = (
                 {/* 底部统计信息 */}
                 {translatedText && (
                   <div className="absolute bottom-3 left-4 flex items-center space-x-4">
-                    <div className="flex items-center space-x-2 text-xs text-gray-500" role="status">
-                      <div className="w-2 h-2 bg-green-500 rounded-full" aria-hidden="true"></div>
-                      <span>翻译完成</span>
-                    </div>
-                    <span className="text-xs text-gray-500" aria-label={`翻译结果长度${translatedText.length}个字符`}>{translatedText.length} 字符</span>
+                    <span className="text-xs font-medium text-gray-500" aria-label={`翻译结果长度${translatedText.length}个字符`}>{translatedText.length.toLocaleString()} 字符</span>
                   </div>
                 )}
               </div>

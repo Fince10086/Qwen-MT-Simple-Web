@@ -2,7 +2,7 @@ import { Language, ModelInfo, QwenMTModel } from '../types'
 
 // 支持的语言列表（基于Qwen-MT支持的92种语言）
 export const SUPPORTED_LANGUAGES: Language[] = [
-  { code: 'auto', name: '自动检测', nativeName: 'Auto Detect' },
+  { code: 'auto', name: '自动', nativeName: 'Auto' },
   { code: 'zh', name: '中文', nativeName: '中文' },
   { code: 'en', name: '英语', nativeName: 'English' },
   { code: 'ja', name: '日语', nativeName: '日本語' },
