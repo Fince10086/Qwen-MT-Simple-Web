@@ -72,12 +72,6 @@ export const useTranslationStore = create<TranslationStore>()(
       swapLanguages: () => {
         const { sourceLanguage, targetLanguage, sourceText, translatedText } = get()
         
-        // 不能交换自动检测
-        if (sourceLanguage === 'auto') {
-          set({ error: '无法交换语言：源语言为自动检测' })
-          return
-        }
-        
         set({
           sourceLanguage: targetLanguage,
           targetLanguage: sourceLanguage,

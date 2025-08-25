@@ -11,7 +11,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { APIKeySettingsProps } from '../types'
 
-// ActionButton组件，与UnifiedTranslationPanel中的保持一致
+// ActionButton组件，与TranslationPanel中的保持一致
 interface ActionButtonProps {
   onClick: () => void
   disabled?: boolean

@@ -13,7 +13,7 @@ import {
 import { Language, QwenMTModel, ModelInfo } from '../types'
 import { DEFAULT_CONFIG } from '../utils/constants'
 
-interface UnifiedTranslationPanelProps {
+interface TranslationPanelProps {
   // 文本相关
   sourceText: string
   translatedText: string
@@ -237,7 +237,7 @@ const ModelToggle: React.FC<ModelToggleProps> = ({
 
 
 
-export const UnifiedTranslationPanel: React.FC<UnifiedTranslationPanelProps> = ({
+export const TranslationPanel: React.FC<TranslationPanelProps> = ({
   sourceText,
   translatedText,
   isTranslating,
@@ -283,6 +283,57 @@ export const UnifiedTranslationPanel: React.FC<UnifiedTranslationPanelProps> = (
       return // 不能交换自动
     }
     onSwapLanguages()
+  }
+  
+  // 智能语言切换处理函数
+  const handleSmartLanguageChange = (newLanguage: string, isSource: boolean) => {
+    console.log('🔄 智能语言切换:', { 
+      isSource, 
+      newLanguage, 
+      currentSourceLanguage: sourceLanguage, 
+      currentTargetLanguage: targetLanguage 
+    })
+    
+    if (isSource) {
+      // 处理源语言变化
+      if (newLanguage === targetLanguage && newLanguage !== 'auto') {
+        // 情况1: 新选择的源语言与目标语言相同（且不为'auto'）
+        if (sourceLanguage === 'auto') {
+          // 子情况: 源语言从'auto'切换过来，智能切换目标语言
+          if (newLanguage === 'zh') {
+            onTargetLanguageChange('en') // 如果都是中文，目标变英文
+          } else {
+            onTargetLanguageChange('zh') // 否则，目标变中文
+          }
+          // 最后设置源语言
+          onSourceLanguageChange(newLanguage)
+        } else {
+          // 子情况: 源语言不是'auto'，直接交换
+          onSwapLanguages()
+        }
+      } else {
+        // 情况2: 正常设置源语言
+        onSourceLanguageChange(newLanguage)
+      }
+    } else {
+      // 处理目标语言变化
+      if (newLanguage === sourceLanguage && sourceLanguage !== 'auto') {
+        // 情况1: 新选择的目标语言与源语言相同，且源语言不是自动检测 -> 交换语言
+        onSwapLanguages()
+      } else if (newLanguage === targetLanguage) {
+        // 情况2: 用户重复选择当前目标语言 -> 智能切换
+        if (newLanguage === 'zh') {
+          // 如果当前目标语言是中文，切换为英文
+          onTargetLanguageChange('en')
+        } else {
+          // 如果当前目标语言是其他语言，切换为中文
+          onTargetLanguageChange('zh')
+        }
+      } else {
+        // 情况3: 正常设置目标语言
+        onTargetLanguageChange(newLanguage)
+      }
+    }
   }
   
   // 计算文本框高度的函数
@@ -336,7 +387,7 @@ export const UnifiedTranslationPanel: React.FC<UnifiedTranslationPanelProps> = (
                   <LanguageButton
                     language={selectedSourceLang}
                     options={availableLanguages}
-                    onChange={onSourceLanguageChange}
+                    onChange={(language) => handleSmartLanguageChange(language, true)}
                     disabled={disabled}
                     label="源语言"
                   />
@@ -355,7 +406,7 @@ export const UnifiedTranslationPanel: React.FC<UnifiedTranslationPanelProps> = (
                   <LanguageButton
                     language={selectedTargetLang}
                     options={targetLanguageOptions}
-                    onChange={onTargetLanguageChange}
+                    onChange={(language) => handleSmartLanguageChange(language, false)}
                     disabled={disabled}
                     label="目标语言"
                   />
@@ -601,4 +652,4 @@ export const UnifiedTranslationPanel: React.FC<UnifiedTranslationPanelProps> = (
   )
 }
 
-export default UnifiedTranslationPanel
+export default TranslationPanel

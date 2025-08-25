@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import UnifiedTranslationPanel from './components/UnifiedTranslationPanel'
+import TranslationPanel from './components/TranslationPanel'
 import HistoryPanel from './components/HistoryPanel'
 import ErrorBoundary from './components/ErrorBoundary'
 import SettingsPanel from './components/SettingsPanel'
@@ -95,7 +95,7 @@ const TranslationContainer: React.FC<TranslationContainerProps> = ({ activeTab }
             <h1 id="translation-heading" className="sr-only">
               翻译
             </h1>
-            <UnifiedTranslationPanel
+            <TranslationPanel
               sourceText={sourceText}
               translatedText={translatedText}
               isTranslating={isTranslating}

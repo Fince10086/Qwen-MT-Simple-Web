@@ -1,6 +1,6 @@
 // 统一导出所有组件
 export { default as LanguageSelector } from './LanguageSelector'
-export { default as UnifiedTranslationPanel } from './UnifiedTranslationPanel'
+export { default as TranslationPanel } from './TranslationPanel'
 export { default as HistoryPanel } from './HistoryPanel'
 export { default as APIKeySettings } from './APIKeySettings'
 export { default as SettingsPanel } from './SettingsPanel'
