@@ -11,6 +11,52 @@ import {
 } from '@heroicons/react/24/outline'
 import { APIKeySettingsProps } from '../types'
 
+// ActionButton组件，与UnifiedTranslationPanel中的保持一致
+interface ActionButtonProps {
+  onClick: () => void
+  disabled?: boolean
+  children: React.ReactNode
+  title?: string
+  variant?: 'primary' | 'secondary' | 'danger'
+  size?: 'sm' | 'md' | 'lg'
+}
+
+const ActionButton: React.FC<ActionButtonProps> = ({
+  onClick,
+  disabled = false,
+  children,
+  title,
+  variant = 'secondary',
+  size = 'md'
+}) => {
+  const baseClasses = 'inline-flex items-center justify-center rounded-2xl font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 disabled:hover:scale-100'
+  
+  const variants = {
+    primary: 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white focus:ring-blue-500 border-0',
+    secondary: 'bg-white hover:bg-gray-50 text-gray-700 focus:ring-gray-400 border border-gray-200 hover:border-gray-300',
+    danger: 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white focus:ring-red-500 border-0'
+  }
+  
+  const sizes = {
+    sm: 'px-3 py-1.5 text-xs',
+    md: 'px-4 py-2 text-sm',
+    lg: 'px-6 py-3 text-base font-semibold'
+  }
+  
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      title={title}
+      className={`${baseClasses} ${variants[variant]} ${sizes[size]}`}
+      type="button"
+      aria-label={title}
+    >
+      {children}
+    </button>
+  )
+}
+
 const APIKeySettings: React.FC<APIKeySettingsProps> = ({
   apiKey,
   isValid,
@@ -133,29 +179,30 @@ const APIKeySettings: React.FC<APIKeySettingsProps> = ({
         </div>
         
         {/* 操作按钮 */}
-        <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="API Key操作按钮">
-          <button
+        <div className="mt-3 flex flex-wrap gap-3" role="group" aria-label="API Key操作按钮">
+          <ActionButton
             onClick={handleAPIKeySubmit}
             disabled={isValidating || !inputValue.trim()}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            aria-describedby="api-key-status"
-            type="button"
+            variant="primary"
+            size="md"
+            title={isValidating ? '验证中...' : (inputValue.trim() !== apiKey ? '保存并验证' : '验证')}
           >
+            {isValidating && (
+              <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+            )}
             {isValidating ? '验证中...' : (inputValue.trim() !== apiKey ? '保存并验证' : '验证')}
-          </button>
-          
-
+          </ActionButton>
           
           {inputValue !== apiKey && (
-            <button
+            <ActionButton
               onClick={() => setInputValue(apiKey)}
               disabled={isValidating}
-              className="btn-secondary text-sm disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-              type="button"
-              aria-label="取消修改，恢复到原始值"
+              variant="secondary"
+              size="md"
+              title="取消修改，恢复到原始值"
             >
               取消
-            </button>
+            </ActionButton>
           )}
         </div>
       </div>

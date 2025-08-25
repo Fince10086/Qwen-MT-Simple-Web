@@ -120,8 +120,7 @@ const TranslationContainer: React.FC<TranslationContainerProps> = ({ activeTab }
         
         {/* 历史记录面板 */}
         {activeTab === 'history' && (
-          <section aria-labelledby="history-heading" className="bg-white border border-gray-200 rounded-2xl">
-            <div className="p-4 lg:p-8">
+            <section aria-labelledby="history-heading">
               <h1 id="history-heading" className="sr-only">
                 历史记录
               </h1>
@@ -131,19 +130,16 @@ const TranslationContainer: React.FC<TranslationContainerProps> = ({ activeTab }
                 onDeleteHistoryItem={removeFromHistory}
                 onClearHistory={clearHistory}
               />
-            </div>
-          </section>
+            </section>
         )}
         
         {/* 设置面板 */}
         {activeTab === 'settings' && (
-          <section aria-labelledby="settings-heading" className="bg-white border border-gray-200 rounded-2xl">
-            <div className="p-4 lg:p-8">
-              <h1 id="settings-heading" className="sr-only">
-                设置
-              </h1>
-              <SettingsPanel />
-            </div>
+          <section aria-labelledby="settings-heading">
+            <h1 id="settings-heading" className="sr-only">
+              设置
+            </h1>
+            <SettingsPanel />
           </section>
         )}
       </main>

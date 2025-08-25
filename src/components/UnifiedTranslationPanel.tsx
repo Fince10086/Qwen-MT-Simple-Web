@@ -540,8 +540,7 @@ export const UnifiedTranslationPanel: React.FC<UnifiedTranslationPanelProps> = (
                       <div className="flex items-center space-x-3 text-blue-600" role="status" aria-live="polite">
                         <div className="w-6 h-6 border-3 border-blue-600 border-t-transparent rounded-full animate-spin" aria-hidden="true" />
                         <div className="text-center">
-                          <div className="text-sm font-medium">AI 正在为您翻译...</div>
-                          <div className="text-xs text-blue-500 mt-1">请稍候，优质翻译需要一点时间</div>
+                          <div className="text-sm font-medium">翻译中...</div>
                         </div>
                       </div>
                     </div>
@@ -604,9 +603,10 @@ export const UnifiedTranslationPanel: React.FC<UnifiedTranslationPanelProps> = (
                 onClick={onClear}
                 disabled={disabled || isTranslating}
                 variant="secondary"
+                size="lg"
                 title="清空文本"
               >
-                <TrashIcon className="w-4 h-4 mr-2" aria-hidden="true" />
+                <TrashIcon className="w-5 h-5 mr-3" aria-hidden="true" />
                 清空
               </ActionButton>
             )}
