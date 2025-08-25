@@ -79,6 +79,8 @@ const ActionButton: React.FC<ActionButtonProps> = ({
       disabled={disabled}
       title={title}
       className={`${baseClasses} ${variants[variant]} ${sizes[size]}`}
+      type="button"
+      aria-label={title}
     >
       {children}
     </button>
@@ -106,12 +108,18 @@ const LanguageButton: React.FC<LanguageButtonProps> = ({
   return (
     <Listbox value={language?.code || ''} onChange={onChange} disabled={disabled}>
       <div className="relative">
-        <Listbox.Button className="group flex items-center space-x-2 lg:space-x-3 bg-white rounded-xl px-3 lg:px-4 py-2.5 lg:py-3 border border-gray-200 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed min-w-[120px] lg:min-w-[140px] justify-center transform hover:scale-[1.02] disabled:hover:scale-100 shadow-sm hover:shadow-md">
-          <div className={`w-2 lg:w-2.5 h-2 lg:h-2.5 ${dotColor} rounded-full group-hover:scale-110 transition-transform duration-200`}></div>
+        <Listbox.Label className="sr-only">{label}选择</Listbox.Label>
+        <Listbox.Button 
+          className="group flex items-center space-x-2 lg:space-x-3 bg-white rounded-xl px-3 lg:px-4 py-2.5 lg:py-3 border border-gray-200 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed min-w-[120px] lg:min-w-[140px] justify-center transform hover:scale-[1.02] disabled:hover:scale-100 shadow-sm hover:shadow-md"
+          aria-label={`当前${label}: ${language?.name || '未选择'}`}
+          aria-haspopup="listbox"
+          aria-expanded={false}
+        >
+          <div className={`w-2 lg:w-2.5 h-2 lg:h-2.5 ${dotColor} rounded-full group-hover:scale-110 transition-transform duration-200`} aria-hidden="true"></div>
           <span className="text-xs lg:text-sm font-medium text-gray-700 group-hover:text-gray-900 transition-colors duration-200 truncate">
             {language?.name || label}
           </span>
-          <ChevronUpDownIcon className="w-3 h-3 lg:w-4 lg:h-4 text-gray-400 group-hover:text-gray-600 transition-colors duration-200 flex-shrink-0" />
+          <ChevronUpDownIcon className="w-3 h-3 lg:w-4 lg:h-4 text-gray-400 group-hover:text-gray-600 transition-colors duration-200 flex-shrink-0" aria-hidden="true" />
         </Listbox.Button>
         
         <Transition
@@ -124,7 +132,7 @@ const LanguageButton: React.FC<LanguageButtonProps> = ({
           leaveTo="opacity-0 translate-y-1 scale-95"
         >
           <Listbox.Options className="absolute z-30 mt-2 w-full max-w-xs min-w-[200px] bg-white rounded-xl border border-gray-200 shadow-xl backdrop-blur-sm bg-white/95 focus:outline-none left-1/2 transform -translate-x-1/2">
-            <div className="max-h-64 overflow-y-auto py-2 custom-scrollbar">
+            <div className="max-h-64 overflow-y-auto py-2 custom-scrollbar" role="listbox" aria-label={`${label}选项列表`}>
               {options.map((lang) => (
                 <Listbox.Option
                   key={lang.code}
@@ -189,7 +197,7 @@ const ModelToggle: React.FC<ModelToggleProps> = ({
   const selectedIndex = availableModels.findIndex(model => model.id === selectedModel)
   
   return (
-    <div className="relative flex items-center bg-gray-100 rounded-full p-1 border border-gray-200 shadow-sm">
+    <div className="relative flex items-center bg-gray-100 rounded-full p-1 border border-gray-200 shadow-sm" role="radiogroup" aria-label="选择翻译模型">
       {/* 滑动背景 */}
       <div 
         className={`absolute top-1 bottom-1 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full transition-all duration-300 ease-out shadow-md z-0`}
@@ -197,6 +205,7 @@ const ModelToggle: React.FC<ModelToggleProps> = ({
           width: `calc(50% - 2px)`,
           left: selectedIndex === 0 ? '2px' : `calc(50% + 0px)`,
         }}
+        aria-hidden="true"
       />
       
       {/* 按钮 */}
@@ -208,7 +217,7 @@ const ModelToggle: React.FC<ModelToggleProps> = ({
             onClick={() => !disabled && onModelChange(model.id)}
             disabled={disabled}
             className={`
-              relative z-10 flex-1 px-4 py-2 text-sm font-semibold rounded-full transition-all duration-300 min-w-[70px] flex items-center justify-center
+              relative z-10 flex-1 px-4 py-2 text-sm font-semibold rounded-full transition-all duration-300 min-w-[70px] flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
               ${
                 isSelected
                   ? 'text-white'
@@ -216,6 +225,9 @@ const ModelToggle: React.FC<ModelToggleProps> = ({
               }
               ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
             `}
+            aria-checked={isSelected}
+            role="radio"
+            aria-label={`选择${model.name}模型`}
             title={model.name}
           >
             <span className="flex items-center space-x-1">
@@ -223,7 +235,7 @@ const ModelToggle: React.FC<ModelToggleProps> = ({
               {model.id === 'qwen-mt-plus' && (
                 <span className={`text-xs ${
                   isSelected ? 'text-yellow-200' : 'text-yellow-600'
-                }`}>★</span>
+                }`} aria-hidden="true">★</span>
               )}
             </span>
           </button>
@@ -343,10 +355,12 @@ export const UnifiedTranslationPanel: React.FC<UnifiedTranslationPanelProps> = (
                   <button
                     onClick={handleSwap}
                     disabled={disabled || sourceLanguage === 'auto'}
-                    className="p-2 lg:p-3 text-gray-400 hover:text-blue-600 hover:bg-white/80 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 disabled:hover:scale-100 shadow-sm hover:shadow-md flex-shrink-0"
+                    className="p-2 lg:p-3 text-gray-400 hover:text-blue-600 hover:bg-white/80 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 disabled:hover:scale-100 shadow-sm hover:shadow-md flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    aria-label={sourceLanguage === 'auto' ? '无法交换：源语言为自动检测' : '交换源语言和目标语言'}
                     title={sourceLanguage === 'auto' ? '无法交换：源语言为自动检测' : '交换语言'}
+                    type="button"
                   >
-                    <ArrowsRightLeftIcon className="w-4 h-4 lg:w-5 lg:h-5" />
+                    <ArrowsRightLeftIcon className="w-4 h-4 lg:w-5 lg:h-5" aria-hidden="true" />
                   </button>
                   
                   <LanguageButton
@@ -401,8 +415,8 @@ export const UnifiedTranslationPanel: React.FC<UnifiedTranslationPanelProps> = (
             {/* 输入区域 */}
             <div className="space-y-4">
               <div className="flex items-center justify-between mb-4">
-                <label className="text-base font-semibold text-gray-700 flex items-center">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
+                <label htmlFor="source-text-input" className="text-base font-semibold text-gray-700 flex items-center">
+                  <div className="w-3 h-3 bg-blue-500 rounded-full mr-3" aria-hidden="true"></div>
                   输入文本
                 </label>
                 {sourceText && (
@@ -411,7 +425,7 @@ export const UnifiedTranslationPanel: React.FC<UnifiedTranslationPanelProps> = (
                     title="复制源文本"
                     size="sm"
                   >
-                    <ClipboardDocumentIcon className="w-4 h-4 mr-1" />
+                    <ClipboardDocumentIcon className="w-4 h-4 mr-1" aria-hidden="true" />
                     {copiedText === 'source' ? '已复制' : '复制'}
                   </ActionButton>
                 )}
@@ -419,6 +433,7 @@ export const UnifiedTranslationPanel: React.FC<UnifiedTranslationPanelProps> = (
               
               <div className="relative">
                 <textarea
+                  id="source-text-input"
                   value={sourceText}
                   onChange={(e) => onSourceTextChange(e.target.value)}
                   onKeyDown={handleKeyDown}
@@ -438,32 +453,35 @@ export const UnifiedTranslationPanel: React.FC<UnifiedTranslationPanelProps> = (
                     maxHeight: '600px'
                   }}
                   maxLength={maxLength}
+                  aria-describedby="source-text-help source-text-stats"
+                  aria-invalid={isTextTooLong ? 'true' : 'false'}
+                  spellCheck="true"
                 />
                 
                 {/* 左下角文本统计 */}
-                <div className="absolute bottom-3 left-4 flex items-center space-x-4">
+                <div id="source-text-stats" className="absolute bottom-3 left-4 flex items-center space-x-4">
                   <span className={`text-xs font-medium ${
                     isTextTooLong ? 'text-red-500' : 'text-gray-500'
                   }`}>
                     {textLength.toLocaleString()}/{maxLength.toLocaleString()}
                   </span>
                   {isTextTooLong && (
-                    <div className="flex items-center space-x-1 text-red-500">
-                      <ExclamationTriangleIcon className="w-3 h-3" />
+                    <div className="flex items-center space-x-1 text-red-500" role="alert">
+                      <ExclamationTriangleIcon className="w-3 h-3" aria-hidden="true" />
                       <span className="text-xs">超出限制</span>
                     </div>
                   )}
                 </div>
                 
                 {/* 右下角操作提示 */}
-                <div className="absolute bottom-3 right-4 flex items-center space-x-2">
+                <div id="source-text-help" className="absolute bottom-3 right-4 flex items-center space-x-2">
                   {isTranslating && (
-                    <div className="flex items-center space-x-1 text-blue-600">
-                      <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                    <div className="flex items-center space-x-1 text-blue-600" role="status" aria-live="polite">
+                      <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" aria-hidden="true" />
                       <span className="text-xs font-medium">分析中</span>
                     </div>
                   )}
-                  <div className="text-xs text-gray-400 bg-white/80 backdrop-blur-sm px-2 py-1 rounded-md border border-gray-200">
+                  <div className="text-xs text-gray-400 bg-white/80 backdrop-blur-sm px-2 py-1 rounded-md border border-gray-200" aria-label="快捷键提示">
                     Ctrl+Enter 快速翻译
                   </div>
                 </div>
@@ -473,8 +491,8 @@ export const UnifiedTranslationPanel: React.FC<UnifiedTranslationPanelProps> = (
             {/* 翻译结果区域 */}
             <div className="space-y-4">
               <div className="flex items-center justify-between mb-4">
-                <label className="text-base font-semibold text-gray-700 flex items-center">
-                  <div className="w-3 h-3 bg-emerald-500 rounded-full mr-3"></div>
+                <label htmlFor="translation-result" className="text-base font-semibold text-gray-700 flex items-center">
+                  <div className="w-3 h-3 bg-emerald-500 rounded-full mr-3" aria-hidden="true"></div>
                   翻译结果
                 </label>
                 {translatedText && (
@@ -484,7 +502,7 @@ export const UnifiedTranslationPanel: React.FC<UnifiedTranslationPanelProps> = (
                       title="复制翻译结果"
                       size="sm"
                     >
-                      <ClipboardDocumentIcon className="w-4 h-4 mr-1" />
+                      <ClipboardDocumentIcon className="w-4 h-4 mr-1" aria-hidden="true" />
                       {copiedText === 'target' ? '已复制' : '复制'}
                     </ActionButton>
                     
@@ -495,7 +513,7 @@ export const UnifiedTranslationPanel: React.FC<UnifiedTranslationPanelProps> = (
                       title="保存到历史记录"
                       size="sm"
                     >
-                      <BookmarkIcon className="w-4 h-4" />
+                      <BookmarkIcon className="w-4 h-4" aria-hidden="true" />
                     </ActionButton>
                   </div>
                 )}
@@ -503,6 +521,7 @@ export const UnifiedTranslationPanel: React.FC<UnifiedTranslationPanelProps> = (
               
               <div className="relative">
                 <div 
+                  id="translation-result"
                   className={`
                     w-full px-6 py-4 pb-12 bg-white border border-gray-200 rounded-2xl transition-all duration-300 overflow-y-auto custom-scrollbar
                     ${translatedText ? 'border-emerald-200 bg-emerald-50' : 'bg-gray-50'}
@@ -512,11 +531,14 @@ export const UnifiedTranslationPanel: React.FC<UnifiedTranslationPanelProps> = (
                     height: unifiedHeight + 'px',
                     maxHeight: '600px'
                   }}
+                  role="region"
+                  aria-label="翻译结果显示区域"
+                  aria-live="polite"
                 >
                   {isTranslating ? (
                     <div className="h-full flex items-center justify-center" style={{ minHeight: '188px' }}>
-                      <div className="flex items-center space-x-3 text-blue-600">
-                        <div className="w-6 h-6 border-3 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                      <div className="flex items-center space-x-3 text-blue-600" role="status" aria-live="polite">
+                        <div className="w-6 h-6 border-3 border-blue-600 border-t-transparent rounded-full animate-spin" aria-hidden="true" />
                         <div className="text-center">
                           <div className="text-sm font-medium">AI 正在为您翻译...</div>
                           <div className="text-xs text-blue-500 mt-1">请稍候，优质翻译需要一点时间</div>
@@ -532,7 +554,7 @@ export const UnifiedTranslationPanel: React.FC<UnifiedTranslationPanelProps> = (
                       ) : (
                         <div className="h-full flex items-center justify-center text-gray-400" style={{ minHeight: '188px' }}>
                           <div className="text-center">
-                            <LanguageIcon className="w-10 h-10 mx-auto mb-3 opacity-50" />
+                            <LanguageIcon className="w-10 h-10 mx-auto mb-3 opacity-50" aria-hidden="true" />
                             <p className="text-base font-medium mb-1">翻译结果将显示在这里</p>
                             <p className="text-sm">请在左侧输入要翻译的文本</p>
                           </div>
@@ -545,11 +567,11 @@ export const UnifiedTranslationPanel: React.FC<UnifiedTranslationPanelProps> = (
                 {/* 底部统计信息 */}
                 {translatedText && (
                   <div className="absolute bottom-3 left-4 flex items-center space-x-4">
-                    <div className="flex items-center space-x-2 text-xs text-gray-500">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <div className="flex items-center space-x-2 text-xs text-gray-500" role="status">
+                      <div className="w-2 h-2 bg-green-500 rounded-full" aria-hidden="true"></div>
                       <span>翻译完成</span>
                     </div>
-                    <span className="text-xs text-gray-500">{translatedText.length} 字符</span>
+                    <span className="text-xs text-gray-500" aria-label={`翻译结果长度${translatedText.length}个字符`}>{translatedText.length} 字符</span>
                   </div>
                 )}
               </div>
@@ -557,7 +579,7 @@ export const UnifiedTranslationPanel: React.FC<UnifiedTranslationPanelProps> = (
           </div>
           
           {/* 操作按钮区域 */}
-          <div className="flex flex-col sm:flex-row items-center justify-center pt-6 lg:pt-8 border-t border-gray-200 mt-6 lg:mt-8 space-y-4 sm:space-y-0 sm:space-x-6">
+          <div className="flex flex-col sm:flex-row items-center justify-center pt-6 lg:pt-8 border-t border-gray-200 mt-6 lg:mt-8 space-y-4 sm:space-y-0 sm:space-x-6" role="group" aria-label="翻译操作按钮">
             <ActionButton
               onClick={onTranslate}
               disabled={disabled || isTranslating || !sourceText.trim() || isTextTooLong}
@@ -566,12 +588,12 @@ export const UnifiedTranslationPanel: React.FC<UnifiedTranslationPanelProps> = (
             >
               {isTranslating ? (
                 <>
-                  <div className="w-5 h-5 mr-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <div className="w-5 h-5 mr-3 border-2 border-white border-t-transparent rounded-full animate-spin" aria-hidden="true" />
                   翻译中...
                 </>
               ) : (
                 <>
-                  <LanguageIcon className="w-5 h-5 mr-3" />
+                  <LanguageIcon className="w-5 h-5 mr-3" aria-hidden="true" />
                   翻译
                 </>
               )}
@@ -584,7 +606,7 @@ export const UnifiedTranslationPanel: React.FC<UnifiedTranslationPanelProps> = (
                 variant="secondary"
                 title="清空文本"
               >
-                <TrashIcon className="w-4 h-4 mr-2" />
+                <TrashIcon className="w-4 h-4 mr-2" aria-hidden="true" />
                 清空
               </ActionButton>
             )}

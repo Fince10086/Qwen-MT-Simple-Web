@@ -79,17 +79,22 @@ const TranslationContainer: React.FC<TranslationContainerProps> = ({ activeTab }
     <div className="tongyi-page lg:ml-20 pb-20 lg:pb-0">
       {/* 错误提示 */}
       {error && (
-        <ErrorAlert
-          message={error}
-          onClose={() => setError(null)}
-        />
+        <div role="alert" aria-live="assertive">
+          <ErrorAlert
+            message={error}
+            onClose={() => setError(null)}
+          />
+        </div>
       )}
       
       {/* 主内容区域 */}
-      <div className="mx-auto px-4 lg:px-6 py-4 lg:py-8">
+      <main className="mx-auto px-4 lg:px-6 py-4 lg:py-8" role="main">
         {/* 翻译面板 */}
         {activeTab === 'translate' && (
-          <div>
+          <section aria-labelledby="translation-heading">
+            <h1 id="translation-heading" className="sr-only">
+              翻译
+            </h1>
             <UnifiedTranslationPanel
               sourceText={sourceText}
               translatedText={translatedText}
@@ -110,13 +115,16 @@ const TranslationContainer: React.FC<TranslationContainerProps> = ({ activeTab }
               isAPIKeyValid={isAPIKeyValid}
               disabled={!apiKey || !isAPIKeyValid}
             />
-          </div>
+          </section>
         )}
         
         {/* 历史记录面板 */}
         {activeTab === 'history' && (
-          <div className="bg-white border border-gray-200 rounded-2xl">
+          <section aria-labelledby="history-heading" className="bg-white border border-gray-200 rounded-2xl">
             <div className="p-4 lg:p-8">
+              <h1 id="history-heading" className="sr-only">
+                历史记录
+              </h1>
               <HistoryPanel
                 history={history}
                 onHistoryItemClick={handleHistoryItemClick}
@@ -124,18 +132,21 @@ const TranslationContainer: React.FC<TranslationContainerProps> = ({ activeTab }
                 onClearHistory={clearHistory}
               />
             </div>
-          </div>
+          </section>
         )}
         
         {/* 设置面板 */}
         {activeTab === 'settings' && (
-          <div className="bg-white border border-gray-200 rounded-2xl">
+          <section aria-labelledby="settings-heading" className="bg-white border border-gray-200 rounded-2xl">
             <div className="p-4 lg:p-8">
+              <h1 id="settings-heading" className="sr-only">
+                设置
+              </h1>
               <SettingsPanel />
             </div>
-          </div>
+          </section>
         )}
-      </div>
+      </main>
     </div>
   )
 }
@@ -146,11 +157,45 @@ const App: React.FC = () => {
   
   const handleTabChange = (tab: 'translate' | 'history' | 'settings') => {
     setActiveTab(tab)
+    // 当切换标签页时，通知屏幕阅读器
+    const pageNames = {
+      translate: '翻译页面',
+      history: '历史记录页面', 
+      settings: '设置页面'
+    }
+    // 创建一个临时的通知元素
+    const announcement = document.createElement('div')
+    announcement.setAttribute('aria-live', 'polite')
+    announcement.setAttribute('aria-atomic', 'true')
+    announcement.className = 'sr-only'
+    announcement.textContent = `已切换到${pageNames[tab]}`
+    document.body.appendChild(announcement)
+    setTimeout(() => {
+      document.body.removeChild(announcement)
+    }, 1000)
   }
   
   return (
     <ErrorBoundary>
       <div className="min-h-screen">
+        {/* 跃过链接 - 无障碍导航 */}
+        <a 
+          href="#main-content" 
+          className="skip-link"
+          onFocus={(e) => e.target.style.left = '6px'}
+          onBlur={(e) => e.target.style.left = '-9999px'}
+        >
+          跳过到主要内容
+        </a>
+        
+        {/* 实时通知区域，用于屏幕阅读器 */}
+        <div 
+          aria-live="polite" 
+          aria-atomic="true" 
+          className="sr-live"
+          id="live-region"
+        ></div>
+        
         {/* 左侧边栏 */}
         <Sidebar 
           activeTab={activeTab}
@@ -159,9 +204,11 @@ const App: React.FC = () => {
         />
         
         {/* 主内容区域 */}
-        <TranslationContainer 
-          activeTab={activeTab}
-        />
+        <div id="main-content">
+          <TranslationContainer 
+            activeTab={activeTab}
+          />
+        </div>
       </div>
     </ErrorBoundary>
   )

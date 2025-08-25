@@ -182,6 +182,60 @@
 }
 
 @layer utilities {
+  /* 屏幕阅读器专用类 - 视觉隐藏但对辅助技术可见 */
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  
+  /* 可跳过的链接，仅在焦点时显示 */
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    z-index: 999;
+    padding: 8px 16px;
+    background: #000;
+    color: #fff;
+    text-decoration: none;
+    transition: left 0.3s;
+    border-radius: 4px;
+  }
+  
+  .skip-link:focus {
+    left: 6px;
+  }
+  
+  /* 高对比度焦点指示 */
+  .focus\:ring-high-contrast:focus {
+    --tw-ring-color: #000;
+    --tw-ring-offset-color: #fff;
+    --tw-ring-offset-width: 3px;
+  }
+  
+  /* 增强的焦点指示 */
+  .enhanced-focus:focus {
+    outline: 3px solid #2563eb;
+    outline-offset: 2px;
+  }
+  
+  /* 用于实时通知的区域 */
+  .sr-live {
+    position: absolute;
+    left: -10000px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+  
   /* 移动端安全区域支持 */
   .safe-area-pb {
     padding-bottom: env(safe-area-inset-bottom);

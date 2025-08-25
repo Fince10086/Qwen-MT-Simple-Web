@@ -2,7 +2,6 @@ import React from 'react'
 import {
   CogIcon,
   KeyIcon,
-  GlobeAltIcon,
   CodeBracketIcon
 } from '@heroicons/react/24/outline'
 import APIKeySettings from './APIKeySettings'
