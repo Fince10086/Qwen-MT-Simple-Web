@@ -522,17 +522,18 @@ export const HistoryPanel: React.FC<HistoryPanelProps> = ({
               <div className="sr-only" aria-live="polite" aria-atomic="true">
                 当前显示{filteredHistory.length}条翻译记录，使用上下箭头键或Tab键浏览，回车或空格键展开详情
               </div>
-              {/* 两列网格布局 */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+              {/* 响应式瀑布流布局 */}
+              <div className="columns-1 lg:columns-2 masonry-container">
                 {filteredHistory.map((record) => (
-                  <HistoryItem
-                    key={record.id}
-                    record={record}
-                    onSelect={onHistoryItemClick}
-                    onDelete={onDeleteHistoryItem}
-                    isActive={activeItemId === record.id}
-                    onFocus={handleItemFocus}
-                  />
+                  <div key={record.id} className="masonry-item">
+                    <HistoryItem
+                      record={record}
+                      onSelect={onHistoryItemClick}
+                      onDelete={onDeleteHistoryItem}
+                      isActive={activeItemId === record.id}
+                      onFocus={handleItemFocus}
+                    />
+                  </div>
                 ))}
               </div>
             </div>

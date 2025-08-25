@@ -102,6 +102,33 @@
     }
   }
   
+  /* 瀑布流布局优化 */
+  .masonry-container {
+    column-gap: 1rem;
+    orphans: 1;
+    widows: 1;
+  }
+  
+  @media (min-width: 1024px) {
+    .masonry-container {
+      column-gap: 1.5rem;
+    }
+  }
+  
+  .masonry-item {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    display: inline-block;
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+  
+  @media (min-width: 1024px) {
+    .masonry-item {
+      margin-bottom: 1.5rem;
+    }
+  }
+  
   /* 通义风格页面容器 */
   .tongyi-page {
     @apply min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50;
