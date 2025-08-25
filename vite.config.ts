@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: process.env.NODE_ENV === 'production' ? '/qwen-translation-site/' : '/',
+  base: process.env.NODE_ENV === 'production' ? '/Qwen-MT-Simple-Web/' : '/',
   server: {
     host: '0.0.0.0',
     port: 3000,
