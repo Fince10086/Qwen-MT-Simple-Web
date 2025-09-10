@@ -73,7 +73,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       >
 
         {/* 导航区域 */}
-        <div className="flex-1 p-4 space-y-4" role="group" aria-label="功能导航">
+        <div className="flex-1 p-4 space-y-4 flex flex-col justify-start mt-[50%]" role="group" aria-label="功能导航">
           <SidebarItem
             icon={LanguageIcon}
             label="翻译"
