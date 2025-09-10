@@ -484,6 +484,43 @@ export const TranslationPanel: React.FC<TranslationPanelProps> = ({
               </div>
             </div>
             
+            {/* 移动端翻译按钮区域（仅在 lg 以下屏幕显示） */}
+            <div className="lg:hidden col-span-1 flex flex-col items-center justify-center py-4" role="group" aria-label="翻译操作按钮">
+              <ActionButton
+                onClick={onTranslate}
+                disabled={disabled || isTranslating || !sourceText.trim()}
+                variant="primary"
+                size="lg"
+              >
+                {isTranslating ? (
+                  <>
+                    <div className="w-5 h-5 mr-3 border-2 border-white border-t-transparent rounded-full animate-spin" aria-hidden="true" />
+                    翻译中...
+                  </>
+                ) : (
+                  <>
+                    <LanguageIcon className="w-5 h-5 mr-3" aria-hidden="true" />
+                    翻译
+                  </>
+                )}
+              </ActionButton>
+              
+              {sourceText && (
+                <div className="mt-3">
+                  <ActionButton
+                    onClick={onClear}
+                    disabled={disabled || isTranslating}
+                    variant="secondary"
+                    size="md"
+                    title="清空文本"
+                  >
+                    <TrashIcon className="w-4 h-4 mr-2" aria-hidden="true" />
+                    清空
+                  </ActionButton>
+                </div>
+              )}
+            </div>
+            
             {/* 翻译结果区域 */}
             <div className="space-y-4">
               <div className="flex items-center justify-between mb-4">
@@ -566,8 +603,8 @@ export const TranslationPanel: React.FC<TranslationPanelProps> = ({
             </div>
           </div>
           
-          {/* 操作按钮区域 */}
-          <div className="flex flex-col sm:flex-row items-center justify-center pt-6 lg:pt-8 border-t border-gray-200 mt-6 lg:mt-8 space-y-4 sm:space-y-0 sm:space-x-6" role="group" aria-label="翻译操作按钮">
+          {/* 桁面端翻译按钮区域（仅在 lg 及以上屏幕显示） */}
+          <div className="hidden lg:flex flex-col sm:flex-row items-center justify-center pt-6 lg:pt-8" role="group" aria-label="翻译操作按钮">
             <ActionButton
               onClick={onTranslate}
               disabled={disabled || isTranslating || !sourceText.trim()}
