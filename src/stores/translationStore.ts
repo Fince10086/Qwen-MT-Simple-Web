@@ -359,46 +359,7 @@ export const useTranslationStore = create<TranslationStore>()(
         isAPIKeyValid: state.isAPIKeyValid,
         enabledLanguages: state.enabledLanguages // 持久化用户选择的语言
       }),
-      version: 2, // 增加版本号
-      migrate: (persistedState: any, version: number) => {
-        try {
-          // 版本迁移逻辑
-          if (version === 0) {
-            // 从版本0升级到版本1的逻辑
-            persistedState = {
-              ...persistedState,
-              apiRegion: DEFAULT_CONFIG.API_REGION
-            }
-          }
-          
-          if (version <= 1) {
-            // 从版本1升级到版本2：修复历史记录中的时间戳问题
-            if (persistedState.history && Array.isArray(persistedState.history)) {
-              persistedState.history = persistedState.history.map((record: any) => {
-                // 确保timestamp是Date对象
-                if (record.timestamp && typeof record.timestamp === 'string') {
-                  record.timestamp = new Date(record.timestamp)
-                }
-                return record
-              })
-            }
-          }
-          
-          return persistedState
-        } catch (error) {
-          console.error('数据迁移失败，使用默认配置:', error)
-          // 如果迁移失败，返回默认状态
-          return {
-            history: [],
-            selectedModel: DEFAULT_CONFIG.MODEL,
-            sourceLanguage: DEFAULT_CONFIG.SOURCE_LANGUAGE,
-            targetLanguage: DEFAULT_CONFIG.TARGET_LANGUAGE,
-            apiRegion: DEFAULT_CONFIG.API_REGION,
-            apiKey: '',
-            isAPIKeyValid: false
-          }
-        }
-      },
+
       // 添加数据验证函数
       onRehydrateStorage: () => (state) => {
         if (state) {
