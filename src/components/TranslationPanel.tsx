@@ -8,7 +8,6 @@ import {
   ArrowsRightLeftIcon,
   ChevronUpDownIcon,
   CheckIcon,
-  ExclamationTriangleIcon
 } from '@heroicons/react/24/outline'
 import { Language, QwenMTModel, ModelInfo } from '../types'
 
@@ -252,8 +251,6 @@ export const TranslationPanel: React.FC<TranslationPanelProps> = ({
   selectedModel,
   availableModels,
   onModelChange,
-  apiKey,
-  isAPIKeyValid,
   disabled = false
 }) => {
   const [copiedText, setCopiedText] = useState<'source' | 'target' | null>(null)
