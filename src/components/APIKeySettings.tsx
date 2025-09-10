@@ -94,6 +94,12 @@ const APIKeySettings: React.FC<APIKeySettingsProps> = ({
       return null
     }
     
+    // 如果用户正在编辑，不显示验证状态图标
+    if (inputValue.trim() !== apiKey) {
+      return null
+    }
+    
+    // 只有在输入值与存储的apiKey相同时，才显示验证结果图标
     if (isValid) {
       return <CheckCircleIcon className="w-5 h-5 text-green-500" />
     } else {
@@ -110,6 +116,12 @@ const APIKeySettings: React.FC<APIKeySettingsProps> = ({
       return '请输入API Key'
     }
     
+    // 如果用户正在编辑（输入值与存储的apiKey不同），则不显示验证状态
+    if (inputValue.trim() !== apiKey) {
+      return '请点击“保存并验证”按钮进行验证'
+    }
+    
+    // 只有在输入值与存储的apiKey相同时，才显示验证结果
     if (isValid) {
       return 'API Key 有效'
     } else {
@@ -126,6 +138,12 @@ const APIKeySettings: React.FC<APIKeySettingsProps> = ({
       return 'text-gray-500'
     }
     
+    // 如果用户正在编辑，使用中性颜色
+    if (inputValue.trim() !== apiKey) {
+      return 'text-gray-600'
+    }
+    
+    // 只有在输入值与存储的apiKey相同时，才显示验证结果颜色
     if (isValid) {
       return 'text-green-600'
     } else {

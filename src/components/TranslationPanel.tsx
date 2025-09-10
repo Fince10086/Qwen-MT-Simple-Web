@@ -425,26 +425,6 @@ export const TranslationPanel: React.FC<TranslationPanelProps> = ({
         
         {/* 主对话区域 */}
         <div className="p-4 lg:p-8">
-          {/* API Key 状态提示 */}
-          {(!apiKey || !isAPIKeyValid) && (
-            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 lg:p-6 mb-6 lg:mb-8">
-              <div className="flex items-start space-x-3 lg:space-x-4">
-                <div className="flex-shrink-0">
-                  <ExclamationTriangleIcon className="w-5 h-5 lg:w-6 lg:h-6 text-amber-500" />
-                </div>
-                <div className="flex-1">
-                  <h4 className="text-base lg:text-lg font-semibold text-amber-800 mb-1 lg:mb-2">API Key 配置</h4>
-                  <p className="text-sm lg:text-base text-amber-700">
-                    {!apiKey 
-                      ? '请在设置中配置API Key以使用翻译服务'
-                      : 'API Key无效，请检查配置'
-                    }
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-          
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-8">
             {/* 输入区域 */}
             <div className="space-y-4">
