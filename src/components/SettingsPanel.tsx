@@ -21,7 +21,7 @@ export const SettingsPanel: React.FC = () => {
   return (
     <div className="w-full">
       {/* 主容器 - 参照翻译面板风格 */}
-      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+      <div className="bg-white lg:border lg:border-gray-200 lg:rounded-2xl overflow-hidden">
         {/* 顶部配置栏 */}
         <div className="bg-gray-50 px-4 lg:px-8 py-4 lg:py-6 border-b border-gray-200">
           <div className="flex flex-col space-y-4">

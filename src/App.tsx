@@ -88,7 +88,7 @@ const TranslationContainer: React.FC<TranslationContainerProps> = ({ activeTab }
       )}
       
       {/* 主内容区域 */}
-      <main className="mx-auto px-4 lg:px-6 py-4 lg:py-8" role="main">
+      <main className="lg:mx-auto lg:px-6 lg:py-8" role="main">
         {/* 翻译面板 */}
         {activeTab === 'translate' && (
           <section aria-labelledby="translation-heading">
