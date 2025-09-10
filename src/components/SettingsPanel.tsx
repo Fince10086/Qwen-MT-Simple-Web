@@ -76,24 +76,7 @@ export const SettingsPanel: React.FC = () => {
             <div className="space-y-4">
               <LanguageSettings />
             </div>
-            
-            {/* 环境变量配置提示 */}
-            <div className="space-y-4">
-              <h3 className="text-base font-medium text-gray-900 flex items-center">
-                <CodeBracketIcon className="w-4 h-4 mr-3 text-blue-600" aria-hidden="true" />
-                环境变量配置
-              </h3>
-              <div className="bg-gray-50 p-4 lg:p-6 rounded-xl border border-gray-200">
-                <p className="text-sm text-gray-600 mb-3">您也可以在 .env 文件中配置：</p>
-                <code className="block text-sm text-gray-800 bg-white p-3 lg:p-4 rounded-lg border font-mono">
-                  VITE_DASHSCOPE_API_KEY=your_api_key_here<br />
-                  VITE_API_REGION={apiRegion}
-                </code>
-                <p className="mt-3 text-xs text-gray-500">
-                  注意：网页设置优先级高于环境变量配置
-                </p>
-              </div>
-            </div>
+
           </div>
         </div>
       </div>
