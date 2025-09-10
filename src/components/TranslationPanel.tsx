@@ -445,7 +445,7 @@ export const TranslationPanel: React.FC<TranslationPanelProps> = ({
             </div>
           )}
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-8">
             {/* 输入区域 */}
             <div className="space-y-4">
               <div className="flex items-center justify-between mb-4">
