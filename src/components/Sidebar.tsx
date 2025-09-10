@@ -71,26 +71,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         aria-label="主导航"
         role="navigation"
       >
-        {/* Logo 区域 */}
-        <div className="flex-shrink-0 p-4 border-b border-blue-500/30">
-          <div className="flex flex-col items-center justify-center">
-            <div className="w-12 h-16 rounded-2xl flex items-center justify-center mb-2 transform hover:scale-110 transition-all duration-300">
-              <img 
-                src="/tongyi.png" 
-                alt="Qwen翻译"
-                className="w-12 h-12 object-contain"
-              />
-            </div>
-            <div className="text-center" role="img" aria-label="Qwen翻译">
-              <div className="text-xs font-bold text-white">
-                Qwen
-              </div>
-              <div className="text-xs font-bold text-white">
-                MT
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* 导航区域 */}
         <div className="flex-1 p-4 space-y-4" role="group" aria-label="功能导航">

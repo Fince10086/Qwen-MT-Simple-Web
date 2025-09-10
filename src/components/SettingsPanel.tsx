@@ -2,7 +2,6 @@ import React from 'react'
 import {
   CogIcon,
   KeyIcon,
-  CodeBracketIcon
 } from '@heroicons/react/24/outline'
 import APIKeySettings from './APIKeySettings'
 import LanguageSettings from './LanguageSettings'
